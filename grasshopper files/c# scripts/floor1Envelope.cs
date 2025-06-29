@@ -36,22 +36,22 @@ public class Script_Instance : GH_ScriptInstance
     private void RunScript(
 		object footprintCurve,
 		double wallThickness,
-		double floor1Height,
-		string floor1Type,
-		ref object a)
+		double floorHeight,
+		string floorType,
+		ref object floorEnvelope)
     {
         // 1. Cast input to a Rhino curve
         var outer = footprintCurve as Rhino.Geometry.Curve;
         if (outer == null)
         {
-            a = null;
+            floorEnvelope = null;
             return;
         }
 
-        // 2. Only do work if floor1Type is "arcade"
-        if (!string.Equals(floor1Type, "arcade", StringComparison.OrdinalIgnoreCase))
+        // 2. Only do work if floorType is "arcade"
+        if (!string.Equals(floorType, "arcade", StringComparison.OrdinalIgnoreCase))
         {
-            a = null;
+            floorEnvelope = null;
             return;
         }
 
@@ -76,7 +76,7 @@ public class Script_Instance : GH_ScriptInstance
             Rhino.Geometry.CurveOffsetCornerStyle.Sharp);
         if (inners == null || inners.Length == 0)
         {
-            a = null;
+            floorEnvelope = null;
             return;
         }
         var inner = inners[0];
@@ -98,7 +98,7 @@ public class Script_Instance : GH_ScriptInstance
             tol);
         if (planar == null || planar.Length == 0)
         {
-            a = null;
+            floorEnvelope = null;
             return;
         }
         var region = planar[0];
@@ -107,13 +107,13 @@ public class Script_Instance : GH_ScriptInstance
         var bbox = region.GetBoundingBox(true);
         var bottom = bbox.Center;
         var top    = bbox.Center;
-        top.Z += floor1Height;
+        top.Z += floorHeight;
         var spine  = new Rhino.Geometry.LineCurve(bottom, top);
 
         // 8. Extrude that single planar face along the spine (caps both ends)
         var face      = region.Faces[0];
         var extruded  = face.CreateExtrusion(spine, true);
 
-        a = extruded;  
+        floorEnvelope = extruded;  
     }
 }
