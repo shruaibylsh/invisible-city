@@ -1,38 +1,12 @@
 // Grasshopper Script Instance
 #region Usings
 using System;
-using System.Linq;
-using System.Collections;
-using System.Collections.Generic;
-using System.Drawing;
-
 using Rhino;
 using Rhino.Geometry;
-
-using Grasshopper;
-using Grasshopper.Kernel;
-using Grasshopper.Kernel.Data;
-using Grasshopper.Kernel.Types;
 #endregion
 
 public class Script_Instance : GH_ScriptInstance
 {
-    #region Notes
-    /* 
-      Members:
-        RhinoDoc RhinoDocument
-        GH_Document GrasshopperDocument
-        IGH_Component Component
-        int Iteration
-
-      Methods (Virtual & overridable):
-        Print(string text)
-        Print(string format, params object[] args)
-        Reflect(object obj)
-        Reflect(object obj, string method_name)
-    */
-    #endregion
-
     private void RunScript(
 		object footprintCurve,
 		double wallThickness,
@@ -40,80 +14,37 @@ public class Script_Instance : GH_ScriptInstance
 		string floorType,
 		ref object floorEnvelope)
     {
-        // 1. Cast input to a Rhino curve
-        var outer = footprintCurve as Rhino.Geometry.Curve;
-        if (outer == null)
-        {
-            floorEnvelope = null;
-            return;
-        }
+        floorEnvelope = null;
+        if (floorType == "colonnade") return;
 
-        // 2. Only do work if floorType is "arcade"
-        if (!string.Equals(floorType, "arcade", StringComparison.OrdinalIgnoreCase))
+        var outer = footprintCurve as Curve;
+        if (outer == null) return;
+
+        // close polyline if needed
+        if (!outer.IsClosed && outer.TryGetPolyline(out var pl))
         {
-            floorEnvelope = null;
-            return;
+            if (!pl.IsClosed) pl.Add(pl[0]);
+            outer = new PolylineCurve(pl);
         }
 
         double tol = RhinoDocument.ModelAbsoluteTolerance;
+        var inners = outer.Offset(Plane.WorldXY, -wallThickness, tol, CurveOffsetCornerStyle.Sharp);
+        if (inners == null || inners.Length == 0) return;
 
-        // 3. If the input is a polyline that isn't closed, close it
-        if (!outer.IsClosed)
-        {
-            Rhino.Geometry.Polyline pl;
-            if (outer.TryGetPolyline(out pl))
-            {
-                if (!pl.IsClosed) pl.Add(pl[0]);
-                outer = new Rhino.Geometry.PolylineCurve(pl);
-            }
-        }
-
-        // 4. Offset inward by wallThickness
-        var inners = outer.Offset(
-            Rhino.Geometry.Plane.WorldXY,
-            -wallThickness,
-            tol,
-            Rhino.Geometry.CurveOffsetCornerStyle.Sharp);
-        if (inners == null || inners.Length == 0)
-        {
-            floorEnvelope = null;
-            return;
-        }
         var inner = inners[0];
-
-        // 5. Ensure the inner curve is closed too
-        if (!inner.IsClosed)
+        if (!inner.IsClosed && inner.TryGetPolyline(out var pl2))
         {
-            Rhino.Geometry.Polyline pl2;
-            if (inner.TryGetPolyline(out pl2))
-            {
-                if (!pl2.IsClosed) pl2.Add(pl2[0]);
-                inner = new Rhino.Geometry.PolylineCurve(pl2);
-            }
+            if (!pl2.IsClosed) pl2.Add(pl2[0]);
+            inner = new PolylineCurve(pl2);
         }
 
-        // 6. Make a planar Brep ring between outer & inner
-        var planar = Rhino.Geometry.Brep.CreatePlanarBreps(
-            new Rhino.Geometry.Curve[] { outer, inner },
-            tol);
-        if (planar == null || planar.Length == 0)
-        {
-            floorEnvelope = null;
-            return;
-        }
-        var region = planar[0];
+        var breps = Brep.CreatePlanarBreps(new[] { outer, inner }, tol);
+        if (breps == null || breps.Length == 0) return;
 
-        // 7. Build a spine line straight up from the region's centroid
-        var bbox = region.GetBoundingBox(true);
-        var bottom = bbox.Center;
-        var top    = bbox.Center;
-        top.Z += floorHeight;
-        var spine  = new Rhino.Geometry.LineCurve(bottom, top);
+        var region = breps[0];
+        var c     = region.GetBoundingBox(true).Center;
+        var spine = new LineCurve(c, c + Vector3d.ZAxis * floorHeight);
 
-        // 8. Extrude that single planar face along the spine (caps both ends)
-        var face      = region.Faces[0];
-        var extruded  = face.CreateExtrusion(spine, true);
-
-        floorEnvelope = extruded;  
+        floorEnvelope = region.Faces[0].CreateExtrusion(spine, true);
     }
 }

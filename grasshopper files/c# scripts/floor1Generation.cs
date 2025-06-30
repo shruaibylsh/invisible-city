@@ -4,90 +4,77 @@ using System.Collections;
 using System.Collections.Generic;
 using Rhino;
 using Rhino.Geometry;
-
+using Grasshopper.Kernel.Data;
+using Grasshopper.Kernel.Types;
 #endregion
 
 public class Script_Instance : GH_ScriptInstance
 {
     private void RunScript(
-		object floor1Envelope,
-		object floor1SubtractAdd,
-		object floor1Type,
-		ref object a)
+		object floorEnvelope,
+		object subtractAdd,
+		object floorType,
+		ref object floorWall)
     {
-        // 1. Extract Brep lists from inputs
-        var envList = ExtractBreps(floor1Envelope);
-        var subList = ExtractBreps(floor1SubtractAdd);
+        var envelopes = ExtractBreps(floorEnvelope);
+        var subs      = ExtractBreps(subtractAdd);
+        double tol   = RhinoDoc.ActiveDoc?.ModelAbsoluteTolerance ?? RhinoMath.UnsetValue;
 
-        double tol = RhinoDoc.ActiveDoc?.ModelAbsoluteTolerance ?? RhinoMath.UnsetValue;
+        Brep[] unionSubs;
+        try { unionSubs = Brep.CreateBooleanUnion(subs.ToArray(), tol); }
+        catch { unionSubs = subs.ToArray(); }
 
-        // 2. Union all subtractAdd breps
-        Brep[] unionSub;
-        try
+        string type = (floorType as string)?.ToLowerInvariant();
+        var result = new List<Brep>();
+
+        if (type == "colonnade")
         {
-            unionSub = Brep.CreateBooleanUnion(subList.ToArray(), tol);
+            result.AddRange(unionSubs);
         }
-        catch
-        {
-            unionSub = subList.ToArray();
-        }
-
-        // 3. Branch by floor1Type
-        string typeStr = floor1Type as string;
-        Brep[] result = null;
-
-        if (string.Equals(typeStr, "arcade", StringComparison.OrdinalIgnoreCase))
-        {
-            // Combine envelope and unionSub
-            var combined = new List<Brep>();
-            combined.AddRange(envList);
-            if (unionSub != null)
-                combined.AddRange(unionSub);
-
-            // Boolean union of envelope and subtractAdd
-            try
-            {
-                result = Brep.CreateBooleanUnion(combined.ToArray(), tol);
-            }
-            catch
-            {
-                result = combined.ToArray();
-            }
-        }
-        else if (string.Equals(typeStr, "colonnade", StringComparison.OrdinalIgnoreCase))
-        {
-            // Only output unioned subtractAdd
-            result = unionSub;
-        }
+        
         else
         {
-            // Default: return envelope only
-            result = envList.ToArray();
-        }
-
-        a = (result != null && result.Length > 0) ? (object)result : null;
-    }
-
-    // Helper: extract Brep list from various input types
-    private List<Brep> ExtractBreps(object input)
-    {
-        var breps = new List<Brep>();
-        if (input is Brep b)
-        {
-            breps.Add(b);
-        }
-        else if (input is Brep[] ba)
-        {
-            breps.AddRange(ba);
-        }
-        else if (input is IEnumerable ie)
-        {
-            foreach (var item in ie)
+            var toSubtract = subs.Count > 0 ? subs[0] : null;
+            foreach (var env in envelopes)
             {
-                if (item is Brep br)
-                    breps.Add(br);
+                if (toSubtract != null)
+                {
+                    try
+                    {
+                        var diffs = Brep.CreateBooleanDifference(new[]{ env }, new[]{ toSubtract }, tol);
+                        if (diffs?.Length > 0) { result.Add(diffs[0]); continue; }
+                    }
+                    catch {}
+                }
+                result.Add(env);
             }
         }
-        return breps;
+
+        var tree = new GH_Structure<IGH_Goo>();
+        var path = new GH_Path(0);
+        foreach (var brep in result)
+            tree.Append(new GH_Brep(brep), path);
+
+        floorWall = tree;
+    }
+
+    private List<Brep> ExtractBreps(object input)
+    {
+        var list = new List<Brep>();
+        switch (input)
+        {
+            case Brep b:
+                list.Add(b);
+                break;
+            case Brep[] ba:
+                list.AddRange(ba);
+                break;
+            case IEnumerable ie:
+                foreach (var item in ie)
+                    if (item is Brep br)
+                        list.Add(br);
+                break;
+        }
+        return list;
     }
 }
