@@ -32,16 +32,30 @@ public class Script_Instance : GH_ScriptInstance
         {
             case "L":
             case "C":
+            {
+                // same inset size for both, but different placement
+                var notch = new Rectangle3d(Plane.WorldXY, insetWidth, insetLength).ToNurbsCurve();
+
+                if (footprint == "L")
                 {
-                    var notch = new Rectangle3d(Plane.WorldXY, insetWidth, insetLength).ToNurbsCurve();
-                    double dx = footprint == "L"
-                        ? width - insetWidth
-                        : (width - insetWidth) / 2.0;
+                    // top notch (along X): unchanged
+                    double dx = width - insetWidth;
                     notch.Translate(new Vector3d(dx, length - insetLength, 0));
-                    curves.AddRange(Curve.CreateBooleanDifference(outer, notch, tol) 
-                                    ?? Enumerable.Empty<Curve>());
                 }
-                break;
+                else
+                {
+                    // side notch (along Y): flush to right edge, centered vertically
+                    double dx = width - insetWidth;
+                    double dy = (length - insetLength) / 2.0;
+                    notch.Translate(new Vector3d(dx, dy, 0));
+                }
+
+                curves.AddRange(
+                    Curve.CreateBooleanDifference(outer, notch, tol)
+                    ?? Enumerable.Empty<Curve>());
+            }
+            break;
+
 
             case "Courtyard":
                 {

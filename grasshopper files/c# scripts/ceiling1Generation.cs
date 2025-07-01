@@ -44,9 +44,16 @@ public class Script_Instance : GH_ScriptInstance
             Curve c1 = bases[0].DuplicateCurve(); c1.Transform(move);
             Curve c2 = bases[1].DuplicateCurve(); c2.Transform(move);
 
-            Curve o1 = c1.Offset(pl,  edgeOffset,  tol, CurveOffsetCornerStyle.Sharp)?.FirstOrDefault();
-            Curve o2 = c2.Offset(pl, -edgeOffset-wallThickness,  tol, CurveOffsetCornerStyle.Sharp)?.FirstOrDefault();
+            Curve o1 = edgeOffset == 0
+                ? c1
+                : c1.Offset(pl, edgeOffset, tol, CurveOffsetCornerStyle.Sharp)?.FirstOrDefault();
+
+            Curve o2 = edgeOffset == 0
+                ? c2
+                : c2.Offset(pl, -edgeOffset - wallThickness, tol, CurveOffsetCornerStyle.Sharp)?.FirstOrDefault();
+
             if (o1 == null || o2 == null) { ceiling = null; return; }
+
 
             Brep b1 = Extrusion.Create(o1, floorThickness, true).ToBrep(true);
             Brep b2 = Extrusion.Create(o2, floorThickness, true).ToBrep(true);
@@ -60,10 +67,12 @@ public class Script_Instance : GH_ScriptInstance
             var breps = new List<Brep>();
             foreach (var crv in footprintCurve.OfType<Curve>())
             {
-                Curve c = crv.DuplicateCurve(); 
+                Curve c = crv.DuplicateCurve();
                 c.Transform(move);
 
-                Curve off = c.Offset(pl, edgeOffset, tol, CurveOffsetCornerStyle.Sharp)?.FirstOrDefault();
+                Curve off = edgeOffset == 0
+                    ? c
+                    : c.Offset(pl, edgeOffset, tol, CurveOffsetCornerStyle.Sharp)?.FirstOrDefault();
                 if (off == null) continue;
 
                 var ex = Extrusion.Create(off, floorThickness, true);
