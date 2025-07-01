@@ -12,67 +12,68 @@ public class Script_Instance : GH_ScriptInstance
 {
     private void RunScript(
 		object floorEnvelope,
-		object subtractAdd,
+		List<object> subtractAdd,
 		object floorType,
 		ref object floorWall)
     {
-        var envelopes = ExtractBreps(floorEnvelope);
-        var subs      = ExtractBreps(subtractAdd);
-        double tol   = RhinoDoc.ActiveDoc?.ModelAbsoluteTolerance ?? RhinoMath.UnsetValue;
+        // Gather inputs
+        var envelopes = ToBreps(floorEnvelope);
+        var subs       = ToBreps(subtractAdd);
+        double tol     = RhinoDocument.ModelAbsoluteTolerance;
 
-        Brep[] unionSubs;
-        try { unionSubs = Brep.CreateBooleanUnion(subs.ToArray(), tol); }
-        catch { unionSubs = subs.ToArray(); }
+        // Pre-union subtractors once
+        Brep[] unionSubs = subs.Count > 0
+            ? Brep.CreateBooleanUnion(subs, tol) ?? subs.ToArray()
+            : Array.Empty<Brep>();
 
-        string type = (floorType as string)?.ToLowerInvariant();
-        var result = new List<Brep>();
+        var pieces = new List<Brep>();
 
-        if (type == "colonnade")
+        if (string.Equals(floorType as string, "colonnade", StringComparison.OrdinalIgnoreCase))
         {
-            result.AddRange(unionSubs);
+            // just pass through the columns
+            pieces.AddRange(unionSubs);
         }
-        
         else
         {
-            var toSubtract = subs.Count > 0 ? subs[0] : null;
+            // subtract (if any) from each envelope
             foreach (var env in envelopes)
             {
-                if (toSubtract != null)
+                if (unionSubs.Length > 0)
                 {
-                    try
+                    var diff = Brep.CreateBooleanDifference(new[] { env }, unionSubs, tol);
+                    if (diff != null && diff.Length > 0)
                     {
-                        var diffs = Brep.CreateBooleanDifference(new[]{ env }, new[]{ toSubtract }, tol);
-                        if (diffs?.Length > 0) { result.Add(diffs[0]); continue; }
+                        pieces.AddRange(diff);
+                        continue;
                     }
-                    catch {}
                 }
-                result.Add(env);
+                pieces.Add(env);
             }
         }
 
+        // final union of everything
+        Brep[] finalUnion = Brep.CreateBooleanUnion(pieces, tol) ?? pieces.ToArray();
+
+        // pack into a single tree branch
         var tree = new GH_Structure<IGH_Goo>();
         var path = new GH_Path(0);
-        foreach (var brep in result)
-            tree.Append(new GH_Brep(brep), path);
+        foreach (var b in finalUnion)
+            tree.Append(new GH_Brep(b), path);
 
         floorWall = tree;
     }
 
-    private List<Brep> ExtractBreps(object input)
+    // Flatten any Brep, Brep[], or collection of Breps into a List<Brep>
+    private List<Brep> ToBreps(object input)
     {
         var list = new List<Brep>();
         switch (input)
         {
-            case Brep b:
-                list.Add(b);
-                break;
-            case Brep[] ba:
-                list.AddRange(ba);
-                break;
+            case Brep b:            list.Add(b);                      break;
+            case Brep[] ba:         list.AddRange(ba);                break;
             case IEnumerable ie:
-                foreach (var item in ie)
-                    if (item is Brep br)
-                        list.Add(br);
+                foreach (var x in ie)
+                    if (x is Brep br) list.Add(br);
                 break;
         }
         return list;
