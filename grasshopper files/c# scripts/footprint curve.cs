@@ -16,11 +16,17 @@ public class Script_Instance : GH_ScriptInstance
 		double insetLength,
 		double insetWidth,
 		double wallThickness,
+		string floorType,
 		ref object footprintCurve)
     {
         double tol = Rhino.RhinoDoc.ActiveDoc.ModelAbsoluteTolerance;
         var outer = new Rectangle3d(Plane.WorldXY, width, length).ToNurbsCurve();
         var curves = new List<Curve>();
+
+        if (floorType == "colonnade") 
+        {
+            footprint = "Rectangle";
+        }
 
         switch (footprint)
         {
