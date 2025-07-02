@@ -17,16 +17,16 @@ public class Script_Instance : GH_ScriptInstance
     /// then unions all geometry into subtractAdd.
     /// </summary>
     private void RunScript(
-        double colWidth,
-        double archWidth,
-        double wallThickness,
-        int bayCountX,
-        int bayCountY,
-        double colHeight,
-        string floorType,
-        object length,    // Y-dimension
-        object width,     // X-dimension
-        ref object subtractAdd)
+		double colWidth,
+		double archWidth,
+		double wallThickness,
+		int bayCountX,
+		int bayCountY,
+		double colHeight,
+		string floorType,
+		object length,
+		object width,
+		ref object subtractAdd)
     {
         // Convert inputs
         double lengthVal = ToDouble(length);
@@ -39,8 +39,8 @@ public class Script_Instance : GH_ScriptInstance
         {
             double extrudeY = -lengthVal;
             double extrudeX =  widthVal;
-            double step     = colWidth + archWidth;
-            double offset   = wallThickness + 0.5 * colWidth + 0.5 * archWidth;
+            double step     = colWidth + archWidth + 2 * wallThickness;
+            double offset   = step / 2;
 
             // X-direction arches
             for (int i = 0; i < bayCountX; i++)
