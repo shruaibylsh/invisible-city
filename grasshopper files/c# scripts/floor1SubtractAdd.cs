@@ -26,6 +26,8 @@ public class Script_Instance : GH_ScriptInstance
 		string floorType,
 		object length,
 		object width,
+		string footprint,
+		int insetX,
 		ref object subtractAdd)
     {
         // Convert inputs
@@ -93,30 +95,40 @@ public class Script_Instance : GH_ScriptInstance
             }
         }
 
-        // ---- COLONNADE: columns with square+circle tiers, duplicated on opposite wall faces ----
         else if (floorType == "colonnade")
         {
             double radius = wallThickness * 0.5;
             double height = colHeight + archWidth * 0.5 + 0.5;
 
-            // Along X-edge (front/back)
+            // ---- ALONG X-EDGE (front/back) ----
             double xStart = radius;
             double xEnd   = widthVal - radius;
             double segX   = bayCountX > 0 ? (xEnd - xStart) / bayCountX : 0;
             double yPos   = radius;
+
+            // compute which back-face columns to skip
+            int totalCols   = bayCountX + 1;
+            int removeCount = Math.Max(0, insetX - 1);
+            int startRem    = (totalCols - removeCount) / 2;
+            int endRem      = startRem + removeCount - 1;
+
             for (int i = 0; i <= bayCountX; i++)
             {
                 double x = xStart + segX * i;
 
-                // front face
+                // front face (always)
                 AddColumnAt(breps, new Point3d(x, yPos, 0), radius, height);
-                // back face (copy along Y)
-                AddColumnAt(breps,
-                    new Point3d(x, yPos + (lengthVal - wallThickness), 0),
-                    radius, height);
+
+                // back face, skipping the middle (insetX-1) columns
+                if (!(i >= startRem && i <= endRem))
+                {
+                    AddColumnAt(breps,
+                        new Point3d(x, yPos + (lengthVal - wallThickness), 0),
+                        radius, height);
+                }
             }
 
-            // Along Y-edge (left/right)
+            // ---- ALONG Y-EDGE (left/right) – unchanged ----
             double yStart = radius;
             double yEnd   = lengthVal - radius;
             double segY   = bayCountY > 0 ? (yEnd - yStart) / bayCountY : 0;
@@ -124,13 +136,25 @@ public class Script_Instance : GH_ScriptInstance
             for (int j = 0; j <= bayCountY; j++)
             {
                 double y = yStart + segY * j;
-
-                // left face
                 AddColumnAt(breps, new Point3d(xPos, y, 0), radius, height);
-                // right face (copy along X)
                 AddColumnAt(breps,
                     new Point3d(xPos + (widthVal - wallThickness), y, 0),
                     radius, height);
+            }
+
+            // ---- INTERIOR C-SHAPED FACADE (unchanged) ----
+            if (footprint == "C")
+            {
+                int keepCount  = insetX + 1;
+                int startIdx   = (totalCols - keepCount) / 2;
+                int endIdx     = startIdx + keepCount - 1;
+                double specialY = yStart + segY * (bayCountY - 1);
+
+                for (int i = startIdx; i <= endIdx; i++)
+                {
+                    double x = xStart + segX * i;
+                    AddColumnAt(breps, new Point3d(x, specialY, 0), radius, height);
+                }
             }
         }
 
