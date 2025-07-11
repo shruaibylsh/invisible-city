@@ -1,41 +1,44 @@
 using UnityEngine;
-using UnityEngine.InputSystem;  // Make sure you have the Input System package installed
+using UnityEngine.InputSystem;
 
-public class PlayerMovement : MonoBehaviour
+public class HumanMovement : MonoBehaviour
 {
     [Header("Movement Settings")]
-    public float moveSpeed = 3f;    // forward speed (m/s)
-    public float turnSpeed = 120f;  // degrees per second
+    public float moveSpeed = 3f;     // forward speed (m/s)
+    public float turnSpeed = 120f;   // degrees per second
 
-    private Keyboard kb;
+    private Camera agentCamera;
 
     void Awake()
     {
-        kb = Keyboard.current;
-        if (kb == null)
-            Debug.LogError("No keyboard connected. Check that the Input System is enabled and you have a Keyboard device.");
+        // find the camera that’s parented under this agent
+        agentCamera = GetComponentInChildren<Camera>();
+        if (agentCamera == null)
+            Debug.LogError($"No child Camera found on {name}!");
     }
 
     void Update()
     {
-        if (kb == null) return;
+        // only accept input if this agent’s camera is the one rendering
+        if (agentCamera == null || !agentCamera.enabled) 
+            return;
 
-        // 1) Move forward with W or UpArrow
+        var kb = Keyboard.current;
+        if (kb == null) 
+            return;
+
+        // forward
         if (kb.wKey.isPressed || kb.upArrowKey.isPressed)
-        {
             transform.position += transform.forward * moveSpeed * Time.deltaTime;
-        }
 
-        // 2) Rotate left/right with A/D or Left/Right Arrows
+        // turn
         float turn = 0f;
-        if (kb.aKey.isPressed || kb.leftArrowKey.isPressed)
+        if (kb.aKey.isPressed || kb.leftArrowKey.isPressed) 
             turn = -1f;
-        else if (kb.dKey.isPressed || kb.rightArrowKey.isPressed)
+        else if (kb.dKey.isPressed || kb.rightArrowKey.isPressed) 
             turn = 1f;
 
         if (turn != 0f)
-        {
             transform.Rotate(0f, turn * turnSpeed * Time.deltaTime, 0f);
-        }
     }
 }
