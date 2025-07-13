@@ -53,6 +53,7 @@
     <Compile Include="Assets\Scripts\Player\CameraSwitcher.cs" />
     <Compile Include="Assets\Scripts\Helper\PointCloudData.cs" />
     <Compile Include="Assets\Scripts\PCRuntimeVisualizer.cs" />
+    <Compile Include="Assets\Scripts\test.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
