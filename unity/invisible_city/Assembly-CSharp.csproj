@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\PointCloudData.cs" />
     <Compile Include="Assets\Scripts\CameraSwitcher.cs" />
+    <Compile Include="Assets\Scripts\BuildingPointCloudRenderer.cs" />
     <Compile Include="Assets\Scripts\PlayerMovement.cs" />
   </ItemGroup>
   <ItemGroup>
