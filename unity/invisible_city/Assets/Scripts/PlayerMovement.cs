@@ -13,8 +13,6 @@ public class HumanMovement : MonoBehaviour
     {
         // find the camera that’s parented under this agent
         agentCamera = GetComponentInChildren<Camera>();
-        if (agentCamera == null)
-            Debug.LogError($"No child Camera found on {name}!");
     }
 
     void Update()
