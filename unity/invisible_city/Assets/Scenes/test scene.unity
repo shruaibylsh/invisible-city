@@ -583,7 +583,7 @@ PrefabInstance:
       addedObject: {fileID: 151606894}
     - targetCorrespondingSourceObject: {fileID: 5747265063454698252, guid: 35573ad2fd0fc6446b4290242217ac8e, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 151606900}
+      addedObject: {fileID: 151606905}
   m_SourcePrefab: {fileID: 100100000, guid: 35573ad2fd0fc6446b4290242217ac8e, type: 3}
 --- !u!1 &151606893 stripped
 GameObject:
@@ -671,7 +671,7 @@ VisualEffect:
       m_Array: []
     m_Bool:
       m_Array: []
---- !u!114 &151606900
+--- !u!114 &151606905
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -680,12 +680,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 151606893}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab06df5834f69b748aa62792448631e5, type: 3}
+  m_Script: {fileID: 11500000, guid: 80e4b0bc343fe0e47b06eb367602a626, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   pointCloudData: {fileID: 11400000, guid: 2c9bc09cd00b5b74d83dfab9e5271e03, type: 2}
   baseSize: 0.02
   pointColor: {r: 1, g: 1, b: 1, a: 1}
+  verboseDebug: 1
 --- !u!1001 &193122831
 PrefabInstance:
   m_ObjectHideFlags: 0
