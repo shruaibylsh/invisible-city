@@ -1,0 +1,21 @@
+// PointCloudFrustum.compute
+#pragma kernel CSMain
+
+StructuredBuffer<float3> PositionBuffer;
+RWStructuredBuffer<float> MemoryBuffer;   // now float
+float4x4 CameraVP;
+
+[numthreads(64,1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    uint i = id.x;
+    float4 clip = mul(CameraVP, float4(PositionBuffer[i],1));
+    
+    bool inside =
+        abs(clip.x) <= clip.w &&
+        abs(clip.y) <= clip.w &&
+        clip.z      >= 0      &&
+        clip.z      <= clip.w;
+
+    MemoryBuffer[i] = inside ? 1.0 : 0.0;
+}
