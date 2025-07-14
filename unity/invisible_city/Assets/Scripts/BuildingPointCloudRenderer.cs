@@ -14,7 +14,6 @@ public class BuildingPointCloudRenderer : MonoBehaviour
 
     GraphicsBuffer positionBuffer;
     GraphicsBuffer visibleBuffer;
-    GraphicsBuffer memoryBuffer;
     VisualEffect   vfx;
     int            pointCount;
 
@@ -30,9 +29,7 @@ public class BuildingPointCloudRenderer : MonoBehaviour
     public GraphicsBuffer PositionBuffer => positionBuffer;
     public GraphicsBuffer VisibleBuffer  => visibleBuffer;
     
-    public GraphicsBuffer MemoryBuffer  => memoryBuffer;
     public int PointCount => pointCount;
-    // ──────────────────────────────────────────────────────────────────────
 
     void Awake()
     {
@@ -58,14 +55,6 @@ public class BuildingPointCloudRenderer : MonoBehaviour
         visibleBuffer.SetData(ones);
         vfx.SetGraphicsBuffer(ID_VisibleBuffer, visibleBuffer);
 
-        // memory buffer
-        memoryBuffer = new GraphicsBuffer(
-            GraphicsBuffer.Target.Structured, pointCount, sizeof(float));
-        float[] init = new float[pointCount];                 // all 0.0f
-        memoryBuffer.SetData(init);
-        vfx.SetGraphicsBuffer(Shader.PropertyToID("MemoryBuffer"), memoryBuffer);
-
-
         // Style parameters
         vfx.SetFloat(ID_BaseSize, baseSize);
         vfx.SetVector4(ID_PointColor, pointColor);
@@ -77,18 +66,9 @@ public class BuildingPointCloudRenderer : MonoBehaviour
         vfx.SendEvent("SpawnEvent");
     }
 
-    void LateUpdate()
-    {
-        // refill visibility buffer each frame (will be overwritten by compute shader later)
-        uint[] flags = new uint[pointCount];
-        System.Array.Fill(flags, 1u);
-        visibleBuffer.SetData(flags);
-    }
-
     void OnDestroy()
     {
         positionBuffer?.Release();
         visibleBuffer?.Release();
-        memoryBuffer?.Release();
     }
 }
