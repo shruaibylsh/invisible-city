@@ -24,36 +24,30 @@ public class PointCloudVisibilityManager : MonoBehaviour
 
     void LateUpdate()
     {
-        // 1) Confirm we’re running each frame
-        Debug.Log("[VisibilityManager] LateUpdate()");
-
-        // 2) Compute and log the camera’s view-proj matrix
+        // 1) Compute view-projection
         Matrix4x4 vp = cam.projectionMatrix * cam.worldToCameraMatrix;
-        Debug.Log($"[VisibilityManager] CameraVP m00 = {vp.m00}  m11 = {vp.m11}");
 
         foreach (var r in renderers)
         {
             int count  = r.PointCount;
             int groups = Mathf.CeilToInt(count / 64f);
 
-            Debug.Log($"[VisibilityManager] Dispatching on '{r.name}': count={count}, groups={groups}, kernel={kernel}");
-
-            // 3) Bind uniforms and buffers, including each renderer’s transform
+            // 2) Bind
             frustumShader.SetInt   (ID_Count,        count);
             frustumShader.SetMatrix(ID_CameraVP,     vp);
             frustumShader.SetMatrix(ID_LocalToWorld, r.transform.localToWorldMatrix);
             frustumShader.SetBuffer(kernel, "PositionBuffer", r.PositionBuffer);
-            frustumShader.SetBuffer(kernel, "VisibleBuffer",  r.VisibleBuffer);
+            frustumShader.SetBuffer(kernel, "MemoryBuffer",   r.MemoryBuffer);
 
-            // 4) Dispatch the frustum-test kernel
+            // 3) Dispatch
             frustumShader.Dispatch(kernel, groups, 1, 1);
 
-            // 5) Read back a small sample of flags for debugging
-            uint[] sample = new uint[Mathf.Min(5, count)];
-            r.VisibleBuffer.GetData(sample, 0, 0, sample.Length);
-            Debug.Log($"[{r.name}] VisibleBuffer[0..{sample.Length-1}] = {string.Join(", ", sample)}");
+            // 4) Debug sample
+            var sample = new float[Mathf.Min(5, count)];
+            r.MemoryBuffer.GetData(sample, 0, 0, sample.Length);
+            Debug.Log($"[{r.name}] MemoryBuffer[0..{sample.Length-1}] = {string.Join(", ", sample)}");
 
-            // 6) Log how many particles remain alive in the VFX
+            // 5) Debug alive count
             var vfx = r.GetComponent<VisualEffect>();
             Debug.Log($"[{r.name}] aliveParticleCount = {vfx.aliveParticleCount}");
         }

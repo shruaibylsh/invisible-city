@@ -2,29 +2,30 @@
 #pragma kernel CSMain
 
 StructuredBuffer<float3> PositionBuffer;
-RWStructuredBuffer<uint> VisibleBuffer;
-uint                      Count;         // total number of points
-float4x4                  CameraVP;      // camera view-proj matrix
-float4x4                  LocalToWorld;  // each building’s transform
+RWStructuredBuffer<float> MemoryBuffer;
+uint                      Count;
+float4x4                  CameraVP;
+float4x4                  LocalToWorld;
 
 [numthreads(64,1,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
     uint i = id.x;
-    if (i >= Count) return;  // guard against extra threads
+    if (i >= Count) return;
 
-    // Transform the local position into world space
+    // Transform into world space
     float4 worldPos = mul(LocalToWorld, float4(PositionBuffer[i], 1));
 
-    // Project into clip space, then to NDC
+    // Project to clip-space, then to NDC
     float4 clip = mul(CameraVP, worldPos);
     float3 ndc  = clip.xyz / clip.w;
 
-    // Frustum test in NDC: x,y within [-1,1], z within [0,1]
-    bool inside = 
+    // Frustum test (no occlusion yet)
+    bool inside =
         ndc.x >= -1 && ndc.x <= 1 &&
         ndc.y >= -1 && ndc.y <= 1 &&
         ndc.z >=  0 && ndc.z <= 1;
 
-    VisibleBuffer[i] = inside ? 1 : 0;
+    // Write into memory buffer (1.0 = visible, 0.0 = hidden)
+    MemoryBuffer[i] = inside ? 1.0 : 0.0;
 }

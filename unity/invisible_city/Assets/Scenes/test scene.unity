@@ -687,7 +687,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pointCloudData: {fileID: 11400000, guid: bb107e0e34fe76042bde31556486d9d6, type: 2}
-  baseSize: 0.02
   pointColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &261767635
 GameObject:
@@ -2070,7 +2069,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pointCloudData: {fileID: 11400000, guid: 2c9bc09cd00b5b74d83dfab9e5271e03, type: 2}
-  baseSize: 0.02
   pointColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!73398921 &1991056810
 VFXRenderer:
