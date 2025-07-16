@@ -566,7 +566,7 @@ PrefabInstance:
     - target: {fileID: 3376102635637895154, guid: 35573ad2fd0fc6446b4290242217ac8e, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 05275608b71621b45a59e594659dc172, type: 2}
+      objectReference: {fileID: 2100000, guid: 087d9fb2384b7604ea6f3121dd5afbda, type: 2}
     - target: {fileID: 5747265063454698252, guid: 35573ad2fd0fc6446b4290242217ac8e, type: 3}
       propertyPath: m_Name
       value: building 1
@@ -1026,7 +1026,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_RenderShadows: 1
-  m_RequiresDepthTextureOption: 2
+  m_RequiresDepthTextureOption: 1
   m_RequiresOpaqueTextureOption: 2
   m_CameraType: 0
   m_Cameras: []
@@ -1989,6 +1989,10 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5199924662156354222, guid: 72300fb0715933f45ba2653264207a57, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 087d9fb2384b7604ea6f3121dd5afbda, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2032,10 +2036,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ca1cc6b324afcb4ab0fe374f7598df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  frustumShader: {fileID: 7200000, guid: c3e82024bcf87804898a6a60aeab52e2, type: 3}
+  debugShader: {fileID: 7200000, guid: c3e82024bcf87804898a6a60aeab52e2, type: 3}
   renderers:
   - {fileID: 151606908}
   - {fileID: 1991056809}
+  raysPerRenderer: 5
 --- !u!4 &1945590340
 Transform:
   m_ObjectHideFlags: 0

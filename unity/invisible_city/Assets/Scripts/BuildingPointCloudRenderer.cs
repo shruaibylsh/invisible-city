@@ -7,6 +7,8 @@ public class BuildingPointCloudRenderer : MonoBehaviour
 {
     [Header("Point-cloud data (baked asset)")]
     [SerializeField] PointCloudData pointCloudData;
+    public PointCloudData PointCloudData => pointCloudData;
+
 
     [Header("Visual settings")]
     [SerializeField] Color pointColor = Color.white;
@@ -55,9 +57,6 @@ public class BuildingPointCloudRenderer : MonoBehaviour
         // 3) Color parameter (drives alpha in your graph)
         vfx.SetVector4(ID_PointColor, pointColor);
 
-        // 4) Hide original mesh
-        if (TryGetComponent<MeshRenderer>(out var mr))
-            mr.enabled = false;
 
         // 5) Spawn all points
         vfx.SendEvent("SpawnEvent");

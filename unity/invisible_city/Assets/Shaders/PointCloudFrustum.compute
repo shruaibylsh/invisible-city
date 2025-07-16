@@ -1,31 +1,39 @@
-// Assets/Shaders/PointCloudFrustum.compute
 #pragma kernel CSMain
 
 StructuredBuffer<float3> PositionBuffer;
-RWStructuredBuffer<float> MemoryBuffer;
-uint                      Count;
-float4x4                  CameraVP;
-float4x4                  LocalToWorld;
+RWStructuredBuffer<float> MemoryBuffer;         // untouched: frustum flags remain
+RWStructuredBuffer<float2> DebugBuffer;         // x = pointDepth, y = sceneDepth
+
+uint       Count;
+float4x4   LocalToWorld;
+float4x4   WorldToCamera;
+float4x4   CameraVP;
+float      CamNear;
+float      CamFar;
+
+Texture2D<float> DepthTexture;
+SamplerState     sampler_PointClamp;
+int              ScreenWidth;
+int              ScreenHeight;
 
 [numthreads(64,1,1)]
-void CSMain (uint3 id : SV_DispatchThreadID)
+void CSMain(uint3 id : SV_DispatchThreadID)
 {
     uint i = id.x;
     if (i >= Count) return;
 
-    // Transform into world space
-    float4 worldPos = mul(LocalToWorld, float4(PositionBuffer[i], 1));
+    float4 world = mul(LocalToWorld, float4(PositionBuffer[i], 1));
+    float4 clip = mul(CameraVP, world);
+    float3 ndc   = clip.xyz / clip.w;
 
-    // Project to clip-space, then to NDC
-    float4 clip = mul(CameraVP, worldPos);
-    float3 ndc  = clip.xyz / clip.w;
+    float3 eye   = mul(WorldToCamera, world).xyz;
+    float  eyeZ  = -eye.z;
+    float pointDepth = saturate((eyeZ - CamNear) / (CamFar - CamNear));
 
-    // Frustum test (no occlusion yet)
-    bool inside =
-        ndc.x >= -1 && ndc.x <= 1 &&
-        ndc.y >= -1 && ndc.y <= 1 &&
-        ndc.z >=  0 && ndc.z <= 1;
+    float2 uv   = ndc.xy * 0.5 + 0.5;
+    uv = clamp(uv, 0.0, 1.0);
 
-    // Write into memory buffer (1.0 = visible, 0.0 = hidden)
-    MemoryBuffer[i] = inside ? 1.0 : 0.0;
+    float sceneDepth = DepthTexture.SampleLevel(sampler_PointClamp, uv, 0);
+
+    DebugBuffer[i] = float2(pointDepth, sceneDepth);
 }
