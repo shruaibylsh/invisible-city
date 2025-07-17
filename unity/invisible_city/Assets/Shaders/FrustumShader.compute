@@ -2,6 +2,7 @@
 
 StructuredBuffer<float3> PositionBuffer;
 RWStructuredBuffer<float> MemoryBuffer;
+StructuredBuffer<int> VisibilityBuffer;
 
 uint    Count;
 float   DeltaTime;
@@ -10,6 +11,8 @@ float   ForgetRate;
 float4x4 CameraVP;
 float4x4 LocalToWorld;
 float2  ScreenSize;
+float3  CameraPosition;
+float   CullRadiusSqr;
 
 [numthreads(64,1,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
@@ -17,9 +20,22 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     uint i = id.x;
     if (i >= Count) return;
 
-    float4 worldPos = mul(LocalToWorld, float4(PositionBuffer[i], 1));
-    float4 clipPos  = mul(CameraVP, worldPos);
-    float3 ndc      = clipPos.xyz / clipPos.w;
+    float4 worldPos4 = mul(LocalToWorld, float4(PositionBuffer[i], 1));
+    float3 worldPos  = worldPos4.xyz;
+
+    float distSqr = distance(worldPos, CameraPosition);
+    distSqr *= distSqr;
+    if (distSqr > CullRadiusSqr)
+    {
+        MemoryBuffer[i] = 0;
+        return;
+    }
+
+    float distance01 = sqrt(distSqr) / sqrt(CullRadiusSqr);
+    float invDistance = 1.0 - distance01;
+
+    float4 clipPos = mul(CameraVP, worldPos4);
+    float3 ndc     = clipPos.xyz / clipPos.w;
 
     bool isInFrustum =
         ndc.x >= -1 && ndc.x <= 1 &&
@@ -27,10 +43,18 @@ void CSMain (uint3 id : SV_DispatchThreadID)
         ndc.z >= 0  && ndc.z <= 1;
 
     float mem = MemoryBuffer[i];
-    if (isInFrustum)
-        mem += (1.0 - mem) * LearnRate * DeltaTime;
+
+    float modLearnRate  = LearnRate  * invDistance * (1.0 - mem);
+    float modForgetRate = ForgetRate * distance01  * mem;
+
+    if (isInFrustum && VisibilityBuffer[i] == 1)
+    {
+        mem += modLearnRate * DeltaTime;
+    }
     else
-        mem -= mem * ForgetRate * DeltaTime;
+    {
+        mem -= modForgetRate * DeltaTime;
+    }
 
     MemoryBuffer[i] = saturate(mem);
 }

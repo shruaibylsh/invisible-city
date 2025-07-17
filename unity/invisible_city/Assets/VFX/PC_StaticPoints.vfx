@@ -139,10 +139,10 @@ MonoBehaviour:
   - title: Dynamic Scaling
     position:
       serializedVersion: 2
-      x: -237
-      y: 1006
-      width: 689
-      height: 387
+      x: -89
+      y: 1073
+      width: 492
+      height: 327
     contents:
     - model: {fileID: 114350483966675132}
       id: 0
@@ -157,9 +157,9 @@ MonoBehaviour:
   categories: []
   uiBounds:
     serializedVersion: 2
-    x: -237
+    x: -89
     y: 101
-    width: 1149
+    width: 1001
     height: 1527
 --- !u!114 &114350483966674978
 MonoBehaviour:
@@ -1626,7 +1626,7 @@ MonoBehaviour:
   m_UIIgnoredErrors: []
   m_Parent: {fileID: 114350483966674976}
   m_Children: []
-  m_UIPosition: {x: 15, y: 1125}
+  m_UIPosition: {x: 163, y: 1132}
   m_UICollapsed: 0
   m_UISuperCollapsed: 0
   m_InputSlots:
@@ -1723,7 +1723,7 @@ MonoBehaviour:
   m_UIIgnoredErrors: []
   m_Parent: {fileID: 114350483966674976}
   m_Children: []
-  m_UIPosition: {x: -211, y: 1257}
+  m_UIPosition: {x: -63, y: 1264}
   m_UICollapsed: 0
   m_UISuperCollapsed: 0
   m_InputSlots: []
@@ -1982,7 +1982,7 @@ MonoBehaviour:
     linkedSlots:
     - outputSlot: {fileID: 114350483966675204}
       inputSlot: {fileID: 114350483966675133}
-    position: {x: -186.66666, y: 1154.6666}
+    position: {x: -38.666664, y: 1162}
     expandedSlots:
     - {fileID: 114350483966675204}
     expanded: 1
@@ -2057,7 +2057,6 @@ MonoBehaviour:
   m_Direction: 1
   m_LinkedSlots:
   - {fileID: 114350483966675288}
-  - {fileID: 114350483966675292}
 --- !u!114 &114350483966675287
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2252,8 +2251,7 @@ MonoBehaviour:
       m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
         PublicKeyToken=b77a5c561934e089
   m_Direction: 0
-  m_LinkedSlots:
-  - {fileID: 114350483966675244}
+  m_LinkedSlots: []
 --- !u!114 &114350483966675293
 MonoBehaviour:
   m_ObjectHideFlags: 0

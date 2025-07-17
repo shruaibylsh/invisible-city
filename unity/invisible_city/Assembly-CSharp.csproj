@@ -50,7 +50,6 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\VisibilityManager.cs" />
     <Compile Include="Assets\Scripts\BuildingPointCloudRenderer.cs" />
-    <Compile Include="Assets\Scripts\CopyDepthFeature.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerMovement.cs" />
     <Compile Include="Assets\Scripts\Player\CameraSwitcher.cs" />
     <Compile Include="Assets\Scripts\Helper\PointCloudData.cs" />

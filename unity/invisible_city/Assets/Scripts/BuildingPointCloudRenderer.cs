@@ -1,4 +1,3 @@
-// Assets/Scripts/BuildingPointCloudRenderer.cs
 using UnityEngine;
 using UnityEngine.VFX;
 
@@ -7,6 +6,7 @@ public class BuildingPointCloudRenderer : MonoBehaviour
 {
     [Header("Baked point-cloud asset")]
     [SerializeField] PointCloudData pointCloudData;
+    public PointCloudData PointCloudData => pointCloudData;  // <-- Add this
 
     [Header("Tint colour")]
     [SerializeField] Color pointTint = Color.white;
@@ -35,24 +35,19 @@ public class BuildingPointCloudRenderer : MonoBehaviour
         pointCount = pointCloudData.positions.Length;
         vfx        = GetComponent<VisualEffect>();
 
-        /* position --------------------------------------------------------- */
         positionBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured,
                                             pointCount, sizeof(float) * 3);
         positionBuffer.SetData(pointCloudData.positions);
         vfx.SetGraphicsBuffer(ID_PositionBuffer, positionBuffer);
         vfx.SetUInt(ID_SpawnCount, (uint)pointCount);
 
-        /* memory  (start at 0 → invisible until first seen) ---------------- */
         memoryBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured,
                                           pointCount, sizeof(float));
-        var zeros = new float[pointCount];                       // all 0
+        var zeros = new float[pointCount];
         memoryBuffer.SetData(zeros);
         vfx.SetGraphicsBuffer(ID_MemoryBuffer, memoryBuffer);
 
-        /* style ------------------------------------------------------------ */
         vfx.SetVector4(ID_PointTint, pointTint);
-
-        /* spawn once ------------------------------------------------------- */
         vfx.SendEvent("SpawnEvent");
     }
 
