@@ -3,18 +3,16 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
 
-// NOTE: PointCloudData lives in its own file outside any Editor folder.
-
 public static class PointCloudSamplerEditor
 {
-    const float DENSITY  = 100f;                     // fixed: 100 pts / m²
+    const float DENSITY  = 300f;
     const string SAVE_DIR = "Assets/PointCloudBakes";
 
     /* ---------- menu registration ---------- */
-    [MenuItem("Assets/Bake Point Cloud (100 pts/m²)", true)]
+    [MenuItem("Assets/Bake Point Cloud (300 per m²)", true)]
     static bool ValidateBake() => GetMesh(Selection.activeObject) != null;
 
-    [MenuItem("Assets/Bake Point Cloud (100 pts/m²)")]
+    [MenuItem("Assets/Bake Point Cloud (300 per m²)")]
     static void Bake()                                  // single entry point
     {
         Mesh mesh = GetMesh(Selection.activeObject);
@@ -72,7 +70,7 @@ public static class PointCloudSamplerEditor
         /* ----- save as ScriptableObject asset ----- */
         if (!Directory.Exists(SAVE_DIR)) Directory.CreateDirectory(SAVE_DIR);
         string meshName = mesh.name.Replace(" ", "_");
-        string path = $"{SAVE_DIR}/{meshName}_D100.asset";
+        string path = $"{SAVE_DIR}/{meshName}.asset";
 
         var asset = ScriptableObject.CreateInstance<PointCloudData>();
         asset.positions = posList.ToArray();
@@ -80,7 +78,7 @@ public static class PointCloudSamplerEditor
         AssetDatabase.CreateAsset(asset, path);
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
-        Debug.Log($"Point cloud baked: {targetPts} pts  (100 pts/m²)  →  {path}");
+        Debug.Log($"Point cloud baked: {targetPts} pts  (300 per m²)  →  {path}");
     }
 
     /* ---------- helper ---------- */
