@@ -35,6 +35,10 @@ public class BuildingPointCloudRenderer : MonoBehaviour
         pointCount = pointCloudData.positions.Length;
         vfx        = GetComponent<VisualEffect>();
 
+        var meshRenderer = GetComponent<MeshRenderer>();
+        if (meshRenderer != null)
+            meshRenderer.enabled = false;
+
         positionBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured,
                                             pointCount, sizeof(float) * 3);
         positionBuffer.SetData(pointCloudData.positions);
