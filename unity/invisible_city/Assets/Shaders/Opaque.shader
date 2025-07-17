@@ -2,7 +2,7 @@ Shader "Hidden/Opaque"
 {
     SubShader
     {
-        Tags { "RenderType"="Opaque" "Queue"="Geometry" }
+        Tags { "RenderType"="Opaque" "Queue"="Geometry+1" }
         Pass
         {
             Name "DepthOnly"
