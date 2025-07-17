@@ -9,29 +9,25 @@ float   LearnRate;
 float   ForgetRate;
 float4x4 CameraVP;
 float4x4 LocalToWorld;
+float2  ScreenSize;
 
 [numthreads(64,1,1)]
-void CSMain(uint3 id : SV_DispatchThreadID)
+void CSMain (uint3 id : SV_DispatchThreadID)
 {
     uint i = id.x;
     if (i >= Count) return;
 
-    // Transform point to world space
     float4 worldPos = mul(LocalToWorld, float4(PositionBuffer[i], 1));
+    float4 clipPos  = mul(CameraVP, worldPos);
+    float3 ndc      = clipPos.xyz / clipPos.w;
 
-    // Project to clip space → NDC
-    float4 clipPos = mul(CameraVP, worldPos);
-    float3 ndc     = clipPos.xyz / clipPos.w;
-
-    // Frustum test
-    bool visible = 
+    bool isInFrustum =
         ndc.x >= -1 && ndc.x <= 1 &&
         ndc.y >= -1 && ndc.y <= 1 &&
         ndc.z >= 0  && ndc.z <= 1;
 
-    // Memory update
     float mem = MemoryBuffer[i];
-    if (visible)
+    if (isInFrustum)
         mem += (1.0 - mem) * LearnRate * DeltaTime;
     else
         mem -= mem * ForgetRate * DeltaTime;
