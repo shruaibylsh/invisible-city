@@ -2,45 +2,39 @@
 
 StructuredBuffer<float3> PositionBuffer;
 RWStructuredBuffer<float> MemoryBuffer;
-RWStructuredBuffer<uint>  VisibleBuffer;
 
-uint     Count;
-float    DeltaTime;
-float    LearnRate;
-float    ForgetRate;
+uint    Count;
+float   DeltaTime;
+float   LearnRate;
+float   ForgetRate;
 float4x4 CameraVP;
 float4x4 LocalToWorld;
 
 [numthreads(64,1,1)]
-void CSMain (uint3 id : SV_DispatchThreadID)
+void CSMain(uint3 id : SV_DispatchThreadID)
 {
     uint i = id.x;
     if (i >= Count) return;
 
+    // Transform point to world space
     float4 worldPos = mul(LocalToWorld, float4(PositionBuffer[i], 1));
-    float4 clip = mul(CameraVP, worldPos);
-    float3 ndc = clip.xyz / clip.w;
 
-    bool visible =
+    // Project to clip space → NDC
+    float4 clipPos = mul(CameraVP, worldPos);
+    float3 ndc     = clipPos.xyz / clipPos.w;
+
+    // Frustum test
+    bool visible = 
         ndc.x >= -1 && ndc.x <= 1 &&
         ndc.y >= -1 && ndc.y <= 1 &&
-        ndc.z >=  0 && ndc.z <= 1;
+        ndc.z >= 0  && ndc.z <= 1;
 
-    VisibleBuffer[i] = visible ? 1u : 0u;
-
+    // Memory update
     float mem = MemoryBuffer[i];
-
     if (visible)
-    {
-        // Faster at first, slower near 1
         mem += (1.0 - mem) * LearnRate * DeltaTime;
-    }
     else
-    {
-        // Faster at first, slower near 0
         mem -= mem * ForgetRate * DeltaTime;
-    }
 
     MemoryBuffer[i] = saturate(mem);
 }
-
