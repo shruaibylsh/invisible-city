@@ -5,14 +5,14 @@ using System.IO;
 
 public static class PointCloudSamplerEditor
 {
-    const float DENSITY  = 300f;
+    const float DENSITY  = 200f;
     const string SAVE_DIR = "Assets/PointCloudBakes";
 
     /* ---------- menu registration ---------- */
-    [MenuItem("Assets/Bake Point Cloud (300 per m²)", true)]
+    [MenuItem("Assets/Bake Point Cloud (200 per m²)", true)]
     static bool ValidateBake() => GetMesh(Selection.activeObject) != null;
 
-    [MenuItem("Assets/Bake Point Cloud (300 per m²)")]
+    [MenuItem("Assets/Bake Point Cloud (200 per m²)")]
     static void Bake()                                  // single entry point
     {
         Mesh mesh = GetMesh(Selection.activeObject);
@@ -78,7 +78,7 @@ public static class PointCloudSamplerEditor
         AssetDatabase.CreateAsset(asset, path);
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
-        Debug.Log($"Point cloud baked: {targetPts} pts  (300 per m²)  →  {path}");
+        Debug.Log($"Point cloud baked: {targetPts} pts  (200 per m²)  →  {path}");
     }
 
     /* ---------- helper ---------- */

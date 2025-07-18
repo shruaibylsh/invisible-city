@@ -690,7 +690,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab06df5834f69b748aa62792448631e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pointCloudData: {fileID: 11400000, guid: bb107e0e34fe76042bde31556486d9d6, type: 2}
+  pointCloudData: {fileID: 11400000, guid: 7c77867818c19074992d09fd745ef00a, type: 2}
   pointTint: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &261767635
 GameObject:
@@ -1273,7 +1273,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 411821211}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: -0.38268343, z: 0, w: 0.92387956}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -8.3, y: 0.8, z: -15}
   m_LocalScale: {x: 0.4, y: 1.6, z: 0.4}
   m_ConstrainProportionsScale: 0
@@ -1282,7 +1282,7 @@ Transform:
   - {fileID: 883394582}
   - {fileID: 330585546}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: -45, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &411821216
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1388,8 +1388,9 @@ MonoBehaviour:
   - {fileID: 151606908}
   - {fileID: 1991056809}
   baseLearnRate: 0.4
-  baseForgetRate: 0.4
+  baseForgetRate: 0.2
   cullRadius: 50
+  driftAmplitude: 0.5
   occlusionLayer:
     serializedVersion: 2
     m_Bits: 64
@@ -2089,7 +2090,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab06df5834f69b748aa62792448631e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pointCloudData: {fileID: 11400000, guid: 2c9bc09cd00b5b74d83dfab9e5271e03, type: 2}
+  pointCloudData: {fileID: 11400000, guid: 7abdf1ab5f3b7b349b4a3f922d99a2ac, type: 2}
   pointTint: {r: 1, g: 1, b: 1, a: 1}
 --- !u!73398921 &1991056810
 VFXRenderer:

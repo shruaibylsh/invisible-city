@@ -1,18 +1,28 @@
 #pragma kernel CSMain
 
 StructuredBuffer<float3> PositionBuffer;
-RWStructuredBuffer<float> MemoryBuffer;
-StructuredBuffer<int> VisibilityBuffer;
+RWStructuredBuffer<float>  MemoryBuffer;
+StructuredBuffer<int>      VisibilityBuffer;
+RWStructuredBuffer<float3> FinalPositionBuffer;
 
 uint    Count;
 float   DeltaTime;
 float   LearnRate;
 float   ForgetRate;
+float   Amplitude;
+float   GlobalTime;      // <-- new uniform
 float4x4 CameraVP;
 float4x4 LocalToWorld;
 float2  ScreenSize;
 float3  CameraPosition;
 float   CullRadiusSqr;
+
+float3 hash33(float3 p)
+{
+    p = frac(p * 0.1031);
+    p += dot(p, p.yzx + 33.33);
+    return frac((p.xxy + p.yzz) * p.zyx);
+}
 
 [numthreads(64,1,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
@@ -20,7 +30,9 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     uint i = id.x;
     if (i >= Count) return;
 
-    float4 worldPos4 = mul(LocalToWorld, float4(PositionBuffer[i], 1));
+    float3 origPos = PositionBuffer[i];
+
+    float4 worldPos4 = mul(LocalToWorld, float4(origPos, 1));
     float3 worldPos  = worldPos4.xyz;
 
     float distSqr = distance(worldPos, CameraPosition);
@@ -28,6 +40,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     if (distSqr > CullRadiusSqr)
     {
         MemoryBuffer[i] = 0;
+        FinalPositionBuffer[i] = worldPos;
         return;
     }
 
@@ -48,13 +61,26 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     float modForgetRate = ForgetRate * distance01  * mem;
 
     if (isInFrustum && VisibilityBuffer[i] == 1)
-    {
         mem += modLearnRate * DeltaTime;
+    else
+        mem -= modForgetRate * DeltaTime;
+
+    mem = saturate(mem);
+    MemoryBuffer[i] = mem;
+
+    if (mem < 0.5)
+    {
+        float fade = (0.5 - mem) * 2.0; // normalize to 0-1
+        fade *= fade; // non-linear
+
+        float3 noise = hash33(origPos);
+        float3 oscillation = sin(noise * 10.0 + GlobalTime * 0.5); // tide-like
+        float3 shift = oscillation * fade * Amplitude;
+
+        FinalPositionBuffer[i] = worldPos + shift;
     }
     else
     {
-        mem -= modForgetRate * DeltaTime;
+        FinalPositionBuffer[i] = worldPos;
     }
-
-    MemoryBuffer[i] = saturate(mem);
 }

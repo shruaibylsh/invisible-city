@@ -11,18 +11,21 @@ public class PointCloudVisibilityManager : MonoBehaviour
     [Range(0,1)] public float baseLearnRate  = 0.4f;
     [Range(0,1)] public float baseForgetRate = 0.2f;
     public float cullRadius = 50f;
+    public float driftAmplitude = 0.5f;
     public LayerMask occlusionLayer;
 
-    static readonly int ID_Count        = Shader.PropertyToID("Count");
-    static readonly int ID_CameraVP     = Shader.PropertyToID("CameraVP");
-    static readonly int ID_LocalToWorld = Shader.PropertyToID("LocalToWorld");
-    static readonly int ID_DeltaTime    = Shader.PropertyToID("DeltaTime");
-    static readonly int ID_LearnRate    = Shader.PropertyToID("LearnRate");
-    static readonly int ID_ForgetRate   = Shader.PropertyToID("ForgetRate");
-    static readonly int ID_ScreenSize   = Shader.PropertyToID("ScreenSize");
-    static readonly int ID_CamPosition  = Shader.PropertyToID("CameraPosition");
-    static readonly int ID_CullRadiusSqr= Shader.PropertyToID("CullRadiusSqr");
-    static readonly int ID_VisibilityBuffer = Shader.PropertyToID("VisibilityBuffer");
+    static readonly int ID_Count             = Shader.PropertyToID("Count");
+    static readonly int ID_CameraVP          = Shader.PropertyToID("CameraVP");
+    static readonly int ID_LocalToWorld      = Shader.PropertyToID("LocalToWorld");
+    static readonly int ID_DeltaTime         = Shader.PropertyToID("DeltaTime");
+    static readonly int ID_LearnRate         = Shader.PropertyToID("LearnRate");
+    static readonly int ID_ForgetRate        = Shader.PropertyToID("ForgetRate");
+    static readonly int ID_ScreenSize        = Shader.PropertyToID("ScreenSize");
+    static readonly int ID_CamPosition       = Shader.PropertyToID("CameraPosition");
+    static readonly int ID_CullRadiusSqr     = Shader.PropertyToID("CullRadiusSqr");
+    static readonly int ID_VisibilityBuffer  = Shader.PropertyToID("VisibilityBuffer");
+    static readonly int ID_FinalPositionBuffer = Shader.PropertyToID("FinalPositionBuffer");
+    static readonly int ID_Amplitude         = Shader.PropertyToID("Amplitude");
 
     Camera cam;
     int kernel;
@@ -52,6 +55,7 @@ public class PointCloudVisibilityManager : MonoBehaviour
         visibilityCS.SetMatrix (ID_CameraVP,   vp);
         visibilityCS.SetVector (ID_CamPosition, camPos);
         visibilityCS.SetFloat  (ID_CullRadiusSqr, radiusSqr);
+        visibilityCS.SetFloat  (ID_Amplitude, driftAmplitude);
 
         foreach (var r in renderers)
         {
@@ -65,7 +69,6 @@ public class PointCloudVisibilityManager : MonoBehaviour
 
             var queryParams = new QueryParameters(occlusionLayer, false);
 
-
             for (int i = 0; i < cnt; i++)
             {
                 Vector3 worldPos = r.transform.TransformPoint(positions[i]);
@@ -75,23 +78,16 @@ public class PointCloudVisibilityManager : MonoBehaviour
                 if (distToPoint * distToPoint > radiusSqr)
                 {
                     visibilityData[i] = 0;
-                    commands[i] = default; // no raycast
+                    commands[i] = default;
                     continue;
                 }
 
-                commands[i] = new RaycastCommand(
-                    camPos,
-                    dir.normalized,
-                    queryParams,
-                    distToPoint
-                );
+                commands[i] = new RaycastCommand(camPos, dir.normalized, queryParams, distToPoint);
             }
 
-            // Schedule batched raycasts
             JobHandle handle = RaycastCommand.ScheduleBatch(commands, results, 32);
             handle.Complete();
 
-            // Process results
             for (int i = 0; i < cnt; i++)
             {
                 Vector3 worldPos = r.transform.TransformPoint(positions[i]);
@@ -105,13 +101,9 @@ public class PointCloudVisibilityManager : MonoBehaviour
                 }
 
                 if (results[i].collider != null)
-                {
                     visibilityData[i] = Mathf.Abs(results[i].distance - distToPoint) < epsilon ? 1 : 0;
-                }
                 else
-                {
                     visibilityData[i] = 1;
-                }
             }
 
             visibilityBuffer?.Release();
@@ -120,15 +112,16 @@ public class PointCloudVisibilityManager : MonoBehaviour
 
             int groups = Mathf.CeilToInt(cnt / 64f);
 
-            visibilityCS.SetInt   (ID_Count,        cnt);
+            visibilityCS.SetInt   (ID_Count, cnt);
             visibilityCS.SetMatrix(ID_LocalToWorld, r.transform.localToWorldMatrix);
             visibilityCS.SetBuffer(kernel, "PositionBuffer", r.PositionBuffer);
             visibilityCS.SetBuffer(kernel, "MemoryBuffer",   r.MemoryBuffer);
             visibilityCS.SetBuffer(kernel, "VisibilityBuffer", visibilityBuffer);
+            visibilityCS.SetBuffer(kernel, "FinalPositionBuffer", r.FinalPositionBuffer);
+            visibilityCS.SetFloat("GlobalTime", Time.time);
 
             visibilityCS.Dispatch(kernel, groups, 1, 1);
 
-            // Cleanup
             commands.Dispose();
             results.Dispose();
             visibilityData.Dispose();
