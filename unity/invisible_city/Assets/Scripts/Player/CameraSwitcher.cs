@@ -4,11 +4,11 @@ using UnityEngine.InputSystem;
 public class CameraSwitcher : MonoBehaviour
 {
     public Camera cam1, cam2, cam3;
+    public PointCloudVisibilityManager memoryManager;  // Reference to the memory system
 
     void Start()
     {
-        cam1.enabled = true;
-        cam2.enabled = cam3.enabled = false;
+        Activate(cam1);
     }
 
     void Update()
@@ -26,5 +26,8 @@ public class CameraSwitcher : MonoBehaviour
         cam1.enabled = (active == cam1);
         cam2.enabled = (active == cam2);
         cam3.enabled = (active == cam3);
+
+        if (memoryManager != null)
+            memoryManager.activeCamera = active;
     }
 }

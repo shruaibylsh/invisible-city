@@ -158,9 +158,9 @@ MonoBehaviour:
   - title: Dynamic Scaling
     position:
       serializedVersion: 2
-      x: -91
+      x: -142
       y: 964
-      width: 541
+      width: 592
       height: 362
     contents:
     - model: {fileID: 114350483966675132}
@@ -179,9 +179,9 @@ MonoBehaviour:
   categories: []
   uiBounds:
     serializedVersion: 2
-    x: -91
+    x: -142
     y: 101
-    width: 1001
+    width: 1052
     height: 1766
 --- !u!114 &114350483966674978
 MonoBehaviour:
@@ -2006,7 +2006,7 @@ MonoBehaviour:
     linkedSlots:
     - outputSlot: {fileID: 114350483966675204}
       inputSlot: {fileID: 114350483966675133}
-    position: {x: -40, y: 1053.3333}
+    position: {x: -116.66667, y: 1052}
     expandedSlots:
     - {fileID: 114350483966675204}
     expanded: 1

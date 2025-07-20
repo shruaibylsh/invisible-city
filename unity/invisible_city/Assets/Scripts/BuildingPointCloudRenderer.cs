@@ -14,18 +14,20 @@ public class BuildingPointCloudRenderer : MonoBehaviour
     public GraphicsBuffer PositionBuffer => positionBuffer;
     public GraphicsBuffer MemoryBuffer   => memoryBuffer;
     public GraphicsBuffer FinalPositionBuffer => finalPositionBuffer;
+    public GraphicsBuffer VisibilityBuffer => visibilityBuffer;
     public int            PointCount    => pointCount;
 
     GraphicsBuffer positionBuffer;
     GraphicsBuffer memoryBuffer;
-    GraphicsBuffer offsetBuffer;  // not needed anymore if we always output FinalPosition
     GraphicsBuffer finalPositionBuffer;
+    GraphicsBuffer visibilityBuffer;
     VisualEffect   vfx;
     int            pointCount;
 
     static readonly int ID_PositionBuffer = Shader.PropertyToID("PositionBuffer");
     static readonly int ID_MemoryBuffer   = Shader.PropertyToID("MemoryBuffer");
     static readonly int ID_FinalPositionBuffer = Shader.PropertyToID("FinalPositionBuffer");
+    static readonly int ID_VisibilityBuffer = Shader.PropertyToID("VisibilityBuffer");
     static readonly int ID_SpawnCount     = Shader.PropertyToID("SpawnCount");
     static readonly int ID_PointTint      = Shader.PropertyToID("PointColor");
 
@@ -49,23 +51,27 @@ public class BuildingPointCloudRenderer : MonoBehaviour
         vfx.SetUInt(ID_SpawnCount, (uint)pointCount);
 
         memoryBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, pointCount, sizeof(float));
-        var zeros = new float[pointCount];
-        memoryBuffer.SetData(zeros);
+        memoryBuffer.SetData(new float[pointCount]);
         vfx.SetGraphicsBuffer(ID_MemoryBuffer, memoryBuffer);
 
         finalPositionBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, pointCount, sizeof(float) * 3);
-        var zeros3 = new Vector3[pointCount];
-        finalPositionBuffer.SetData(zeros3);
+        finalPositionBuffer.SetData(new Vector3[pointCount]);
         vfx.SetGraphicsBuffer(ID_FinalPositionBuffer, finalPositionBuffer);
+
+        visibilityBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, pointCount, sizeof(int));
+        visibilityBuffer.SetData(new int[pointCount]);
 
         vfx.SetVector4(ID_PointTint, pointTint);
         vfx.SendEvent("SpawnEvent");
+
+        Debug.Log($"[Renderer] Initialized {pointCount} points for VFX on {name}.");
     }
 
     void OnDestroy()
     {
         positionBuffer?.Release();
-        memoryBuffer ?.Release();
+        memoryBuffer?.Release();
         finalPositionBuffer?.Release();
+        visibilityBuffer?.Release();
     }
 }
