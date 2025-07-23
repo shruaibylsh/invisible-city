@@ -63,8 +63,6 @@ public class BuildingPointCloudRenderer : MonoBehaviour
 
         vfx.SetVector4(ID_PointTint, pointTint);
         vfx.SendEvent("SpawnEvent");
-
-        Debug.Log($"[Renderer] Initialized {pointCount} points for VFX on {name}.");
     }
 
     void OnDestroy()

@@ -29,5 +29,8 @@ public class CameraSwitcher : MonoBehaviour
 
         if (memoryManager != null)
             memoryManager.activeCamera = active;
+
     }
 }
+
+

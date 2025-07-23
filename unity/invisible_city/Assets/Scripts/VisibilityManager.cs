@@ -50,8 +50,6 @@ public class PointCloudVisibilityManager : MonoBehaviour
 
             int groups = Mathf.CeilToInt(cnt / 64f);
             visibilityCS.Dispatch(kernel, groups, 1, 1);
-
-            Debug.Log($"[VisibilityManager] Processed {cnt} points for renderer {r.name}.");
         }
     }
 }
