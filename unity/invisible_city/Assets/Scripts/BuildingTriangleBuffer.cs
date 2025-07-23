@@ -10,7 +10,7 @@ public class BuildingTriangleBufferWithAABB : MonoBehaviour
     GraphicsBuffer aabbBuffer;
     GraphicsBuffer triangleRangeBuffer;
 
-    const float AreaThreshold = 0.05f;
+    const float AreaThreshold = 0.1f;
 
     struct Triangle
     {
