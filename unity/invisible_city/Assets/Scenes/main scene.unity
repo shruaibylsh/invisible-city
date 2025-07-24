@@ -1120,7 +1120,7 @@ MonoBehaviour:
   - {fileID: 343254887}
   activeCamera: {fileID: 0}
   baseLearnRate: 0.683
-  baseForgetRate: 0.01
+  baseForgetRate: 0.1
   cullRadius: 50
   driftAmplitude: 0.15
 --- !u!114 &470816366
