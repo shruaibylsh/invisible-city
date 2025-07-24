@@ -17,12 +17,19 @@ public class BuildingPointCloudRenderer : MonoBehaviour
     public GraphicsBuffer VisibilityBuffer => visibilityBuffer;
     public int            PointCount    => pointCount;
 
+
     GraphicsBuffer positionBuffer;
     GraphicsBuffer memoryBuffer;
     GraphicsBuffer finalPositionBuffer;
     GraphicsBuffer visibilityBuffer;
     VisualEffect   vfx;
     int            pointCount;
+    GraphicsBuffer prevRayDirBuffer;
+GraphicsBuffer prevVisibilityBuffer;
+
+public GraphicsBuffer PrevRayDirBuffer => prevRayDirBuffer;
+public GraphicsBuffer PrevVisibilityBuffer => prevVisibilityBuffer;
+
 
     static readonly int ID_PositionBuffer = Shader.PropertyToID("PositionBuffer");
     static readonly int ID_MemoryBuffer   = Shader.PropertyToID("MemoryBuffer");
@@ -61,6 +68,12 @@ public class BuildingPointCloudRenderer : MonoBehaviour
         visibilityBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, pointCount, sizeof(int));
         visibilityBuffer.SetData(new int[pointCount]);
 
+        prevRayDirBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, pointCount, sizeof(float) * 3);
+prevRayDirBuffer.SetData(new Vector3[pointCount]);
+
+prevVisibilityBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, pointCount, sizeof(int));
+prevVisibilityBuffer.SetData(new int[pointCount]);
+
         vfx.SetVector4(ID_PointTint, pointTint);
         vfx.SendEvent("SpawnEvent");
     }
@@ -71,5 +84,8 @@ public class BuildingPointCloudRenderer : MonoBehaviour
         memoryBuffer?.Release();
         finalPositionBuffer?.Release();
         visibilityBuffer?.Release();
+        prevRayDirBuffer?.Release();
+prevVisibilityBuffer?.Release();
+
     }
 }

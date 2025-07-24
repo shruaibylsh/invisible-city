@@ -1944,7 +1944,7 @@ MonoBehaviour:
   - {fileID: 114350483966675290}
   - {fileID: 114350483966675322}
   - {fileID: 114350483966675331}
-  m_UIPosition: {x: 485, y: 1007}
+  m_UIPosition: {x: 485, y: 1006}
   m_UICollapsed: 0
   m_UISuperCollapsed: 0
   m_InputSlots: []
@@ -2411,7 +2411,7 @@ MonoBehaviour:
   - link: []
   blendMode: 1
   cullMode: 0
-  zWriteMode: 0
+  zWriteMode: 1
   zTestMode: 0
   useAlphaClipping: 0
   generateMotionVector: 0
