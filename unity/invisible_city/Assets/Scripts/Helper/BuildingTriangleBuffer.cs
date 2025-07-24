@@ -53,7 +53,6 @@ public class BuildingTriangleBufferWithAABB : MonoBehaviour
         List<TriangleRange> triangleRanges = new List<TriangleRange>();
 
         GameObject[] allObjects = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
-        Debug.Log($"[TriangleBuffer] Found {allObjects.Length} objects.");
 
         foreach (GameObject obj in allObjects)
         {
@@ -63,7 +62,6 @@ public class BuildingTriangleBufferWithAABB : MonoBehaviour
             MeshFilter mf = obj.GetComponent<MeshFilter>();
             if (mf == null || mf.sharedMesh == null)
             {
-                Debug.LogWarning($"[TriangleBuffer] Skipped {obj.name} (no mesh).");
                 continue;
             }
 
@@ -109,7 +107,6 @@ public class BuildingTriangleBufferWithAABB : MonoBehaviour
                 {
                     aabbs.Add(new AABB { min = min, max = max });
                     triangleRanges.Add(new TriangleRange { startIndex = startIdx, count = count });
-                    Debug.Log($"[TriangleBuffer] {obj.name} (submesh {s}): {kept} kept, {skipped} skipped.");
                 }
             }
         }

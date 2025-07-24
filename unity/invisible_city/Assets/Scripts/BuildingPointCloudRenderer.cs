@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.VFX;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(VisualEffect))]
 public class BuildingPointCloudRenderer : MonoBehaviour
@@ -15,28 +16,43 @@ public class BuildingPointCloudRenderer : MonoBehaviour
     public GraphicsBuffer MemoryBuffer   => memoryBuffer;
     public GraphicsBuffer FinalPositionBuffer => finalPositionBuffer;
     public GraphicsBuffer VisibilityBuffer => visibilityBuffer;
-    public int            PointCount    => pointCount;
-
+    public GraphicsBuffer PrevRayDirBuffer => prevRayDirBuffer;
+    public GraphicsBuffer PrevVisibilityBuffer => prevVisibilityBuffer;
+    public int PointCount => pointCount;
 
     GraphicsBuffer positionBuffer;
     GraphicsBuffer memoryBuffer;
     GraphicsBuffer finalPositionBuffer;
     GraphicsBuffer visibilityBuffer;
-    VisualEffect   vfx;
-    int            pointCount;
     GraphicsBuffer prevRayDirBuffer;
-GraphicsBuffer prevVisibilityBuffer;
+    GraphicsBuffer prevVisibilityBuffer;
+    VisualEffect vfx;
+    int pointCount;
 
-public GraphicsBuffer PrevRayDirBuffer => prevRayDirBuffer;
-public GraphicsBuffer PrevVisibilityBuffer => prevVisibilityBuffer;
+    public List<GraphicsBuffer> AgentMemoryBuffers = new List<GraphicsBuffer>();
+    public void InitAgentBuffers(int agentCount)
+    {
+        ReleaseAgentBuffers();
+        for (int i = 0; i < agentCount; i++)
+        {
+            var memBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, pointCount, sizeof(float));
+            memBuffer.SetData(new float[pointCount]);
+            AgentMemoryBuffers.Add(memBuffer);
+        }
+    }
 
+    public void ReleaseAgentBuffers()
+    {
+        foreach (var b in AgentMemoryBuffers) b?.Release();
+        AgentMemoryBuffers.Clear();
+    }
 
     static readonly int ID_PositionBuffer = Shader.PropertyToID("PositionBuffer");
-    static readonly int ID_MemoryBuffer   = Shader.PropertyToID("MemoryBuffer");
+    static readonly int ID_MemoryBuffer = Shader.PropertyToID("MemoryBuffer");
     static readonly int ID_FinalPositionBuffer = Shader.PropertyToID("FinalPositionBuffer");
     static readonly int ID_VisibilityBuffer = Shader.PropertyToID("VisibilityBuffer");
-    static readonly int ID_SpawnCount     = Shader.PropertyToID("SpawnCount");
-    static readonly int ID_PointTint      = Shader.PropertyToID("PointColor");
+    static readonly int ID_SpawnCount = Shader.PropertyToID("SpawnCount");
+    static readonly int ID_PointTint = Shader.PropertyToID("PointColor");
 
     void Awake()
     {
@@ -46,7 +62,7 @@ public GraphicsBuffer PrevVisibilityBuffer => prevVisibilityBuffer;
         }
 
         pointCount = pointCloudData.positions.Length;
-        vfx        = GetComponent<VisualEffect>();
+        vfx = GetComponent<VisualEffect>();
 
         var meshRenderer = GetComponent<MeshRenderer>();
         if (meshRenderer != null)
@@ -69,10 +85,10 @@ public GraphicsBuffer PrevVisibilityBuffer => prevVisibilityBuffer;
         visibilityBuffer.SetData(new int[pointCount]);
 
         prevRayDirBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, pointCount, sizeof(float) * 3);
-prevRayDirBuffer.SetData(new Vector3[pointCount]);
+        prevRayDirBuffer.SetData(new Vector3[pointCount]);
 
-prevVisibilityBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, pointCount, sizeof(int));
-prevVisibilityBuffer.SetData(new int[pointCount]);
+        prevVisibilityBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, pointCount, sizeof(int));
+        prevVisibilityBuffer.SetData(new int[pointCount]);
 
         vfx.SetVector4(ID_PointTint, pointTint);
         vfx.SendEvent("SpawnEvent");
@@ -85,7 +101,7 @@ prevVisibilityBuffer.SetData(new int[pointCount]);
         finalPositionBuffer?.Release();
         visibilityBuffer?.Release();
         prevRayDirBuffer?.Release();
-prevVisibilityBuffer?.Release();
-
+        prevVisibilityBuffer?.Release();
+        ReleaseAgentBuffers();
     }
 }
