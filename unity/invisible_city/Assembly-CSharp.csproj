@@ -48,11 +48,12 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.1.9f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\Camera\PlayerMovement.cs" />
     <Compile Include="Assets\Scripts\VisibilityManager.cs" />
     <Compile Include="Assets\Scripts\BuildingPointCloudRenderer.cs" />
+    <Compile Include="Assets\Scripts\Player\PlayerMovement.cs" />
     <Compile Include="Assets\Scripts\Helper\BuildingTriangleBuffer.cs" />
     <Compile Include="Assets\Scripts\Camera\DualDisplayManager.cs" />
+    <Compile Include="Assets\Scripts\Camera\FollowCamera.cs" />
     <Compile Include="Assets\Scripts\Camera\CameraSwitcher.cs" />
     <Compile Include="Assets\Scripts\Helper\PointCloudData.cs" />
   </ItemGroup>
