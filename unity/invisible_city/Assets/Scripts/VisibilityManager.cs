@@ -3,40 +3,32 @@ using System.Collections.Generic;
 
 public class PointCloudVisibilityManager : MonoBehaviour
 {
-    [System.Serializable]
-    public class AgentCamera
-    {
-        public Camera cam;
-    }
+    public Camera[] agents;
 
     public ComputeShader visibilityCS;
-    public AgentCamera[] agents;
     public BuildingPointCloudRenderer[] renderers;
-    [Range(0, 1)] public float baseLearnRate = 0.4f;
-    [Range(0, 1)] public float baseForgetRate = 0.2f;
+    [Range(0.5f, 1.5f)] public float baseLearnRate = 0.9f;
+    [Range(0f, 0.5f)] public float baseForgetRate = 0.15f;
     public float cullRadius = 50f;
     public float driftAmplitude = 0.15f;
 
     int kernel;
+    int mergeKernel;
+    public ComputeShader mergeMemoryCS; 
     List<int> visibleAABBIndices = new List<int>();
     GraphicsBuffer visibleAABBBuffer;
 
-void Start()
-{
-    foreach (var r in renderers)
+    void Awake()
     {
-        int count = r.PointCount;
-        if (count <= 0)
-        {
-            Debug.LogError($"[{r.name}] Skipping InitAgentBuffers — PointCount is 0");
-            continue;
-        }
-
-        r.InitAgentBuffers(agents.Length);
-        Debug.Log($"[{r.name}] InitAgentBuffers successful with {count} points × {agents.Length} agents.");
+        kernel = visibilityCS.FindKernel("CSMain");
+        mergeKernel = mergeMemoryCS.FindKernel("MergeMemory");
     }
-}
 
+    void Start()
+    {
+        foreach (var r in renderers)
+            r.InitAgentBuffers(agents.Length);
+    }
 
     void LateUpdate()
     {
@@ -55,7 +47,7 @@ void Start()
 
         for (int agentIdx = 0; agentIdx < agents.Length; agentIdx++)
         {
-            var cam = agents[agentIdx].cam;
+            var cam = agents[agentIdx];
             if (!cam) continue;
 
             Matrix4x4 vp = cam.projectionMatrix * cam.worldToCameraMatrix;
@@ -73,6 +65,8 @@ void Start()
                     visibleAABBIndices.Add(i);
             }
 
+            if (Time.frameCount % 10 == 0)
+                Debug.Log($"[VisibilityManager] Agent {agentIdx}: Visible AABBs this frame: {visibleAABBIndices.Count} / {aabbList.Count}");
 
             if (visibleAABBBuffer == null || visibleAABBBuffer.count < visibleAABBIndices.Count)
             {
@@ -105,33 +99,29 @@ void Start()
             }
         }
 
-        // Combine memory from all agents, clamped to 1
+        // Merge memory on GPU
         foreach (var r in renderers)
         {
             int cnt = r.PointCount;
-            float[] combined = new float[cnt];
-            float[] temp = new float[cnt];
+            mergeMemoryCS.SetInt("Count", cnt);
+            mergeMemoryCS.SetBuffer(mergeKernel, "MergedMemory", r.MemoryBuffer);
+            mergeMemoryCS.SetBuffer(mergeKernel, "AgentMemory0", r.AgentMemoryBuffers[0]);
+            mergeMemoryCS.SetBuffer(mergeKernel, "AgentMemory1", r.AgentMemoryBuffers[1]);
+            mergeMemoryCS.SetBuffer(mergeKernel, "AgentMemory2", r.AgentMemoryBuffers[2]);
+            mergeMemoryCS.SetBuffer(mergeKernel, "AgentMemory3", r.AgentMemoryBuffers[3]);
+            mergeMemoryCS.SetBuffer(mergeKernel, "AgentMemory4", r.AgentMemoryBuffers[4]);
+            mergeMemoryCS.SetBuffer(mergeKernel, "AgentMemory5", r.AgentMemoryBuffers[5]);
 
-            for (int a = 0; a < agents.Length; a++)
-            {
-                r.AgentMemoryBuffers[a].GetData(temp);
-                for (int i = 0; i < cnt; i++)
-                    combined[i] += temp[i];
-            }
-
-            for (int i = 0; i < cnt; i++)
-                combined[i] = Mathf.Min(1f, combined[i]);
-
-                r.MemoryBuffer.SetData(combined);
+            int groups = Mathf.CeilToInt(cnt / 64f);
+            mergeMemoryCS.Dispatch(mergeKernel, groups, 1, 1);
         }
+
     }
 
     void OnDestroy()
     {
         visibleAABBBuffer?.Release();
         foreach (var r in renderers)
-        {
             r.ReleaseAgentBuffers();
-        }
     }
 }

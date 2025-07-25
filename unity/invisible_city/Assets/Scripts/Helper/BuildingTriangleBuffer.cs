@@ -13,7 +13,7 @@ public class BuildingTriangleBufferWithAABB : MonoBehaviour
     public static BuildingTriangleBufferWithAABB Instance { get; private set; }
     public List<AABB> AABBList => aabbs;
 
-    const float AreaThreshold = 0.1f;
+    const float AreaThreshold = 0.2f;
 
     struct Triangle
     {

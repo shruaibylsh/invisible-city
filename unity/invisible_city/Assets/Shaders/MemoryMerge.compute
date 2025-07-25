@@ -1,0 +1,29 @@
+#pragma kernel MergeMemory
+
+StructuredBuffer<float> AgentMemory0;
+StructuredBuffer<float> AgentMemory1;
+StructuredBuffer<float> AgentMemory2;
+StructuredBuffer<float> AgentMemory3;
+StructuredBuffer<float> AgentMemory4;
+StructuredBuffer<float> AgentMemory5;
+
+
+RWStructuredBuffer<float> MergedMemory;
+int Count;
+
+[numthreads(64, 1, 1)]
+void MergeMemory(uint3 id : SV_DispatchThreadID)
+{
+    uint i = id.x;
+    if (i >= Count) return;
+
+    float sum = 0;
+    sum += AgentMemory0[i];
+    sum += AgentMemory1[i];
+    sum += AgentMemory2[i];
+    sum += AgentMemory3[i];
+    sum += AgentMemory4[i];
+    sum += AgentMemory5[i];
+
+    MergedMemory[i] = min(1.0, sum);
+}
