@@ -129,8 +129,6 @@ public class BuildingTriangleBufferWithAABB : MonoBehaviour
         visibilityCS.SetBuffer(kernel, "AABBBuffer", aabbBuffer);
         visibilityCS.SetBuffer(kernel, "TriangleRangeBuffer", triangleRangeBuffer);
         visibilityCS.SetInt("TotalAABBs", aabbs.Count);
-
-        Debug.Log($"[TriangleBuffer] Final: {aabbs.Count} surfaces, {triangles.Count} triangles total.");
     }
 
     void OnDestroy()

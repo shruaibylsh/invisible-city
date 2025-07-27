@@ -53,7 +53,6 @@
     <Compile Include="Assets\Scripts\Player\PlayerMovement.cs" />
     <Compile Include="Assets\Scripts\Helper\BuildingTriangleBuffer.cs" />
     <Compile Include="Assets\Scripts\Camera\DualDisplayManager.cs" />
-    <Compile Include="Assets\Scripts\Camera\FollowCamera.cs" />
     <Compile Include="Assets\Scripts\Camera\CameraSwitcher.cs" />
     <Compile Include="Assets\Scripts\Helper\PointCloudData.cs" />
   </ItemGroup>

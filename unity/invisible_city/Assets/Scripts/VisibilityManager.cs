@@ -65,9 +65,6 @@ public class PointCloudVisibilityManager : MonoBehaviour
                     visibleAABBIndices.Add(i);
             }
 
-            if (Time.frameCount % 10 == 0)
-                Debug.Log($"[VisibilityManager] Agent {agentIdx}: Visible AABBs this frame: {visibleAABBIndices.Count} / {aabbList.Count}");
-
             if (visibleAABBBuffer == null || visibleAABBBuffer.count < visibleAABBIndices.Count)
             {
                 visibleAABBBuffer?.Release();
