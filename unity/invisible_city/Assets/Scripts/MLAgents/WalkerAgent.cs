@@ -7,6 +7,7 @@ using Unity.MLAgents.Sensors;
 using System.Linq;
 
 [RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(NavMeshAgent))]
 public class WalkerAgent : Agent
 {
     [Header("Spawn & Environment")]
@@ -24,22 +25,30 @@ public class WalkerAgent : Agent
     public LayerMask buildingLayerMask;
 
     private Animator animator;
+    private NavMeshAgent navAgent;
+    private NavMeshPath navPath;
+
     private float actionTimer = 0f;
     private int currentAction = 0;
+    private int previousAction = -1;
+    private int secondPreviousAction = -1;
 
     private Vector3 spawnPoint;
     private Vector3 origin = Vector3.zero;
 
-    private int previousAction = -1;
-    private int secondPreviousAction = -1;
-
     private Transform[] targetBuildings = new Transform[3];
     private int currentTargetIndex = 0;
-    private HashSet<Transform> visitedTargets = new HashSet<Transform>();
+
+    private float turnCooldownTimer = 0f;
+    private float turnCooldownDuration = 3f;
 
     public override void Initialize()
     {
         animator = GetComponent<Animator>();
+        navAgent = GetComponent<NavMeshAgent>();
+        navAgent.updatePosition = false;
+        navAgent.updateRotation = false;
+        navPath = new NavMeshPath();
     }
 
     public override void OnEpisodeBegin()
@@ -49,19 +58,20 @@ public class WalkerAgent : Agent
             transform.position = hit.position;
         else
         {
-            Debug.LogWarning("Failed to find valid NavMesh point, falling back to (0,0,0)");
             transform.position = Vector3.zero;
             spawnPoint = Vector3.zero;
         }
 
         transform.rotation = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
         AssignRandomTargetBuildings();
-        visitedTargets.Clear();
+        currentTargetIndex = 0;
+        navAgent.SetDestination(targetBuildings[currentTargetIndex].position);
 
         actionTimer = 0f;
         currentAction = 0;
         previousAction = -1;
         secondPreviousAction = -1;
+        turnCooldownTimer = 0f;
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -73,12 +83,33 @@ public class WalkerAgent : Agent
         }
 
         sensor.AddObservation(transform.position / 150f);
+
+        Transform target = targetBuildings[currentTargetIndex];
+        if (target != null &&
+            NavMesh.CalculatePath(transform.position, target.position, NavMesh.AllAreas, navPath) &&
+            navPath.status == NavMeshPathStatus.PathComplete &&
+            navPath.corners.Length > 1)
+        {
+            Vector3 toNext = (navPath.corners[1] - transform.position).normalized;
+            sensor.AddObservation(transform.InverseTransformDirection(toNext));
+            float pathLen = 0f;
+            for (int i = 1; i < navPath.corners.Length; i++)
+                pathLen += Vector3.Distance(navPath.corners[i - 1], navPath.corners[i]);
+            sensor.AddObservation(pathLen / 100f);
+        }
+        else
+        {
+            sensor.AddObservation(Vector3.zero);
+            sensor.AddObservation(0f);
+        }
     }
 
     public override void OnActionReceived(ActionBuffers actions)
     {
-        // Obstacle detection
-        if (Physics.Raycast(transform.position + Vector3.up * 0.5f, transform.forward, out RaycastHit hit, detectDistance, buildingLayerMask))
+        turnCooldownTimer -= Time.deltaTime;
+
+        if (currentAction == 1 &&
+            Physics.Raycast(transform.position + Vector3.up * 0.5f, transform.forward, out RaycastHit hit, detectDistance, buildingLayerMask))
         {
             if (hit.collider.CompareTag("Building"))
             {
@@ -86,6 +117,7 @@ public class WalkerAgent : Agent
                 currentAction = turn;
                 actionTimer = Random.Range(1.0f, 1.5f);
                 animator.SetInteger("ActionState", currentAction);
+                turnCooldownTimer = turnCooldownDuration;
                 PerformCurrentAction();
                 return;
             }
@@ -100,12 +132,26 @@ public class WalkerAgent : Agent
 
         int action = actions.DiscreteActions[0];
 
-        // Only penalize repeating idle 3x
+        bool isTurning = (action == 2 || action == 3);
+        if (isTurning && turnCooldownTimer > 0f)
+        {
+            action = 1;
+        }
+
         if (action == 0 && action == previousAction && previousAction == secondPreviousAction)
+        {
             AddReward(-0.05f);
+        }
+
+        if (isTurning)
+        {
+            AddReward(-0.03f);
+            turnCooldownTimer = turnCooldownDuration;
+        }
 
         secondPreviousAction = previousAction;
         previousAction = action;
+
         currentAction = action;
         actionTimer = (action == 0 || action == 1) ? Random.Range(1.5f, 3f) : Random.Range(0.5f, 2f);
         PerformCurrentAction();
@@ -113,66 +159,68 @@ public class WalkerAgent : Agent
         if (!NavMesh.SamplePosition(transform.position, out var _, 1f, NavMesh.AllAreas))
             EndEpisode();
 
-        // Reward: standing on road mesh
         if (roadMesh != null && roadMesh.bounds.Contains(transform.position))
-            AddReward(0.05f * Time.deltaTime);
+        {
+            AddReward(0.25f * Time.deltaTime);
+            if (currentAction == 1)
+                AddReward(0.15f * Time.deltaTime);
+        }
 
-        // Reward logic for target visitation
         Transform target = targetBuildings[currentTargetIndex];
         float dist = Vector3.Distance(transform.position, target.position);
-
         if (dist < 3f)
         {
-            if (!visitedTargets.Contains(target))
-            {
-                AddReward(0.3f);
-                visitedTargets.Add(target);
-            }
-            else
-            {
-                AddReward(0.2f); // revisit bonus
-            }
-
-            // Encourage facing
+            AddReward(0.3f);
             Vector3 toTarget = (target.position - transform.position).normalized;
             if (Vector3.Dot(transform.forward, toTarget) > 0.7f)
                 AddReward(0.1f);
 
-            // Cycle to next
             currentTargetIndex = (currentTargetIndex + 1) % 3;
+            navAgent.SetDestination(targetBuildings[currentTargetIndex].position);
         }
 
-        // Penalize if stuck on the same target and visited already
-        if (visitedTargets.Count < 3 && visitedTargets.Contains(targetBuildings[currentTargetIndex]))
-            AddReward(-0.05f);
-
-        if (Vector3.Distance(transform.position, origin) > 140f)
-            AddReward(-0.1f * Time.deltaTime);
-
-        if (Vector3.Distance(transform.position, spawnPoint) > 50f)
-            AddReward(-0.05f * Time.deltaTime);
+        if (Vector3.Distance(transform.position, Vector3.zero) > 140f)
+        {
+            AddReward(-10f);
+            EndEpisode();
+        }
     }
 
     private void PerformCurrentAction()
     {
         animator.SetInteger("ActionState", currentAction);
-        switch (currentAction)
+
+        if (currentAction == 1 && navAgent.hasPath)
         {
-            case 1: transform.position += transform.forward * moveSpeed * Time.deltaTime; break;
-            case 2: transform.Rotate(Vector3.up, -turnSpeed * Time.deltaTime); break;
-            case 3: transform.Rotate(Vector3.up, turnSpeed * Time.deltaTime); break;
+            Vector3 direction = navAgent.desiredVelocity.normalized;
+            if (direction != Vector3.zero)
+            {
+                Quaternion targetRot = Quaternion.LookRotation(direction);
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRot, turnSpeed * Time.deltaTime);
+            }
+
+            transform.position += transform.forward * moveSpeed * Time.deltaTime;
         }
+        else if (currentAction == 2)
+        {
+            transform.Rotate(Vector3.up, -turnSpeed * Time.deltaTime);
+        }
+        else if (currentAction == 3)
+        {
+            transform.Rotate(Vector3.up, turnSpeed * Time.deltaTime);
+        }
+
+        navAgent.nextPosition = transform.position;
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)
     {
-        var kb = UnityEngine.InputSystem.Keyboard.current;
         var discrete = actionsOut.DiscreteActions;
-        discrete[0] = 0;
-        if (kb == null) return;
-        if (kb.wKey.isPressed || kb.upArrowKey.isPressed) discrete[0] = 1;
-        else if (kb.aKey.isPressed || kb.leftArrowKey.isPressed) discrete[0] = 2;
-        else if (kb.dKey.isPressed || kb.rightArrowKey.isPressed) discrete[0] = 3;
+        float r = Random.value;
+        if (r < 0.5f)      discrete[0] = 1;
+        else if (r < 0.7f) discrete[0] = 2;
+        else if (r < 0.9f) discrete[0] = 3;
+        else               discrete[0] = 0;
     }
 
     private Vector3 FindRandomPointOnMesh()
@@ -188,8 +236,8 @@ public class WalkerAgent : Agent
         {
             int i = Random.Range(0, tris.Length / 3) * 3;
             Vector3 v0 = verts[tris[i]];
-            Vector3 v1 = verts[tris[i + 1]];
-            Vector3 v2 = verts[tris[i + 2]];
+Vector3 v1 = verts[tris[i + 1]];
+Vector3 v2 = verts[tris[i + 2]];
 
             float a = Random.value;
             float b = Random.value * (1 - a);
@@ -200,27 +248,22 @@ public class WalkerAgent : Agent
             Vector2 flat = new Vector2(world.x, world.z);
             if (flat.magnitude > spawnSampleRadius) continue;
 
-            if (NavMesh.SamplePosition(world, out var hit, 2f, NavMesh.AllAreas))
-                return hit.position;
+            Vector3 above = world + Vector3.up * 5f;
+            if (Physics.Raycast(above, Vector3.down, out RaycastHit hit, 10f))
+            {
+                if (hit.collider == roadMesh && NavMesh.SamplePosition(hit.point, out var navHit, 1f, NavMesh.AllAreas))
+                    return navHit.position;
+            }
         }
 
-        Debug.LogWarning("[WalkerAgent] Failed to sample valid spawn.");
         return Vector3.zero;
     }
 
     private void AssignRandomTargetBuildings()
     {
         var all = GameObject.FindGameObjectsWithTag("Building");
-        if (all.Length < 3)
-        {
-            Debug.LogWarning("Not enough buildings in scene.");
-            return;
-        }
+        if (all.Length < 3) return;
 
         targetBuildings = all.OrderBy(x => Random.value).Take(3).Select(x => x.transform).ToArray();
-
-        Debug.Log($"[WalkerAgent] Spawned at {transform.position}. Assigned targets:");
-        foreach (var t in targetBuildings)
-            Debug.Log($" - {t.name} at {t.position}");
     }
 }
