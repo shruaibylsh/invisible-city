@@ -1,0 +1,29 @@
+{
+    "flaneur2": {
+        "checkpoints": [
+            {
+                "steps": 154569,
+                "file_path": "results\\flaneur2\\flaneur2\\flaneur2-154569.onnx",
+                "reward": null,
+                "creation_time": 1753764052.4741106,
+                "auxillary_file_paths": [
+                    "results\\flaneur2\\flaneur2\\flaneur2-154569.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 154569,
+            "file_path": "results\\flaneur2\\flaneur2.onnx",
+            "reward": null,
+            "creation_time": 1753764052.4741106,
+            "auxillary_file_paths": [
+                "results\\flaneur2\\flaneur2\\flaneur2-154569.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.1.0",
+        "torch_version": "2.9.0.dev20250707+cu128"
+    }
+}

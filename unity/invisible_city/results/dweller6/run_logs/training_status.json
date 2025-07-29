@@ -18,15 +18,33 @@
                 "auxillary_file_paths": [
                     "results\\dweller6\\dweller\\dweller-302184.pt"
                 ]
+            },
+            {
+                "steps": 499961,
+                "file_path": "results\\dweller6\\dweller\\dweller-499961.onnx",
+                "reward": -0.9319999483413994,
+                "creation_time": 1753756342.7568965,
+                "auxillary_file_paths": [
+                    "results\\dweller6\\dweller\\dweller-499961.pt"
+                ]
+            },
+            {
+                "steps": 500025,
+                "file_path": "results\\dweller6\\dweller\\dweller-500025.onnx",
+                "reward": -0.9319999483413994,
+                "creation_time": 1753756342.9555283,
+                "auxillary_file_paths": [
+                    "results\\dweller6\\dweller\\dweller-500025.pt"
+                ]
             }
         ],
         "final_checkpoint": {
-            "steps": 302184,
+            "steps": 500025,
             "file_path": "results\\dweller6\\dweller.onnx",
-            "reward": -0.7444999791138495,
-            "creation_time": 1753718067.8096719,
+            "reward": -0.9319999483413994,
+            "creation_time": 1753756342.9555283,
             "auxillary_file_paths": [
-                "results\\dweller6\\dweller\\dweller-302184.pt"
+                "results\\dweller6\\dweller\\dweller-500025.pt"
             ]
         }
     },
