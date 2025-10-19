@@ -1,9 +1,11 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Unity.MLAgents;
+using UnityEngine.SceneManagement;
+
 
 [RequireComponent(typeof(Animator))]
-public class HumanMovement : MonoBehaviour
+public class PlayerMovement : MonoBehaviour
 {
     public float moveSpeed = 2f;
     public float turnSpeed = 90f;
@@ -21,14 +23,44 @@ public class HumanMovement : MonoBehaviour
         mlAgent = GetComponent<Agent>();
     }
 
+    // "Current agent" = the one whose POV camera is enabled
+    bool IsCurrentAgent() => agentCamera != null && agentCamera.enabled;
+
     void Update()
     {
-        // Mode switching
-        if (Keyboard.current.mKey.wasPressedThisFrame)
-            manualControl = true;
+        var kb = Keyboard.current;
+        if (kb == null) return;
 
-        if (Keyboard.current.rKey.wasPressedThisFrame)
-            manualControl = false;
+        // Global hotkeys (apply regardless of which agent is current)
+        if (kb.escapeKey.wasPressedThisFrame)
+        {
+        #if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+        #else
+            Application.Quit();
+        #endif
+        }
+
+        if (kb.tabKey.wasPressedThisFrame)
+        {
+            // Ensure unpaused before reload
+            if (Time.timeScale == 0f) Time.timeScale = 1f;
+            var scene = SceneManager.GetActiveScene();
+            SceneManager.LoadScene(scene.buildIndex);
+        }
+
+
+        // Only the current agent responds to M / R
+        if (IsCurrentAgent())
+        {
+            if (kb.mKey.wasPressedThisFrame) SetMode(true);   // Manual
+            if (kb.rKey.wasPressedThisFrame) SetMode(false);  // Agent/Auto
+        }
+        else
+        {
+            // Non-current agents should stay in agent mode
+            if (manualControl) SetMode(false);
+        }
 
         // Control logic
         if (manualControl)
@@ -39,13 +71,22 @@ public class HumanMovement : MonoBehaviour
         else
         {
             if (mlAgent != null) mlAgent.enabled = true;
-            // Agent will be driven by ML logic
+            // ML-Agent drives this character
         }
+    }
+
+    void SetMode(bool manual)
+    {
+        manualControl = manual;
+        if (mlAgent != null) mlAgent.enabled = !manual;
+        // (Optional) reset animator state on switch
+        if (!manual) animator.SetInteger("ActionState", 0); // Idle
     }
 
     void ManualControl()
     {
         if (agentCamera == null || !agentCamera.enabled) return;
+
         var kb = Keyboard.current;
         if (kb == null) return;
 

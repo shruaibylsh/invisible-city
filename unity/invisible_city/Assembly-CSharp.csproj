@@ -50,14 +50,15 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\MLAgents\DwellerAgent.cs" />
     <Compile Include="Assets\Scripts\VisibilityManager.cs" />
+    <Compile Include="Assets\Scripts\UI\InfoHover.cs" />
     <Compile Include="Assets\Scripts\BuildingPointCloudRenderer.cs" />
-    <Compile Include="Assets\Scripts\Player\DwellerForward.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerMovement.cs" />
-    <Compile Include="Assets\Scripts\Player\MoveForward.cs" />
+    <Compile Include="Assets\Scripts\Player\ManualMoveForward.cs" />
     <Compile Include="Assets\Scripts\Helper\BuildingTriangleBuffer.cs" />
     <Compile Include="Assets\Scripts\Camera\DualDisplayManager.cs" />
     <Compile Include="Assets\Scripts\MLAgents\FlaneurAgent.cs" />
     <Compile Include="Assets\Scripts\Camera\CameraSwitcher.cs" />
+    <Compile Include="Assets\Scripts\Player\ManualDwellerForward.cs" />
     <Compile Include="Assets\Scripts\Helper\PointCloudData.cs" />
     <Compile Include="Assets\Scripts\MLAgents\WalkerAgent.cs" />
   </ItemGroup>
