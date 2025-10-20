@@ -20,10 +20,6 @@ public class FlaneurAgent : Agent
     public float actionDurationMin = 0.5f;
     public float actionDurationMax = 2.0f;
 
-    [Header("Obstacle Avoidance")]
-    public float detectDistance = 2f;
-    public LayerMask buildingLayerMask;
-
     private Animator animator;
     private NavMeshAgent navAgent;
     private NavMeshPath navPath;
@@ -102,21 +98,6 @@ public class FlaneurAgent : Agent
     public override void OnActionReceived(ActionBuffers actions)
     {
         turnCooldownTimer -= Time.deltaTime;
-
-        if (currentAction == 1 &&
-            Physics.Raycast(transform.position + Vector3.up * 0.5f, transform.forward, out RaycastHit hit, detectDistance, buildingLayerMask))
-        {
-            if (hit.collider.CompareTag("Building"))
-            {
-                int turn = Random.value > 0.5f ? 2 : 3;
-                currentAction = turn;
-                actionTimer = Random.Range(1.0f, 1.5f);
-                animator.SetInteger("ActionState", currentAction);
-                turnCooldownTimer = turnCooldownDuration;
-                PerformCurrentAction();
-                return;
-            }
-        }
 
         if (actionTimer > 0f)
         {

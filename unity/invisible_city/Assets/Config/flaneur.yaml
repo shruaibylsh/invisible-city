@@ -1,0 +1,16 @@
+behaviors:
+  flaneur:
+    trainer_type: ppo
+    max_steps: 450000
+    time_horizon: 128
+    summary_freq: 50000
+    hyperparameters:
+      batch_size: 2048
+      buffer_size: 102400
+      learning_rate: 2.0e-4
+      beta: 0.01
+      num_epoch: 3
+    reward_signals:
+      extrinsic:
+        gamma: 0.995
+        strength: 1.0

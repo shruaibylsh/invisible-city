@@ -220,7 +220,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "CONTROLS\r\n   \u2022 M for Manual Mode, P for Agent Mode\n   \u2022 W,
+  m_text: "CONTROLS\r\n   \u2022 M for Manual Mode, R for Agent Mode\n   \u2022 W,
     A, D or Arrow Keys to move\n   \u2022 Press 1-6 to switch between agents 1-6\r\r\n  
     \u2022 Press Esc to Quit\n   \u2022 Press Tab to restart\n\nINVISIBLE CITY \na
     project by Sihui Lin, 2025\r\n"
@@ -367,10 +367,6 @@ MonoBehaviour:
   turnSpeed: 20
   actionDurationMin: 0.5
   actionDurationMax: 2
-  detectDistance: 2
-  buildingLayerMask:
-    serializedVersion: 2
-    m_Bits: 0
 --- !u!114 &298462011
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -384,7 +380,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 16
+    VectorObservationSize: 12
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 0
@@ -393,10 +389,10 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: fe8332dce6f1c904d949c1601ac7852b, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: 2cf8a8abff07c044b91919d69ceecc6c, type: 3}
   m_InferenceDevice: 0
   m_BehaviorType: 2
-  m_BehaviorName: walker2
+  m_BehaviorName: walker
   TeamId: 0
   m_UseChildSensors: 1
   m_UseChildActuators: 1
@@ -408,7 +404,7 @@ NavMeshAgent:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 298462004}
-  m_Enabled: 0
+  m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
   m_Speed: 0
@@ -508,10 +504,6 @@ MonoBehaviour:
   turnSpeed: 20
   actionDurationMin: 0.5
   actionDurationMax: 2
-  obstacleDetectDistance: 1
-  buildingLayerMask:
-    serializedVersion: 2
-    m_Bits: 0
 --- !u!114 &373191769
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -534,7 +526,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 398780ac4e57dda45879b387302c1e6f, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: e7f52bb4c5fe51a4e981fad4c7c19f2a, type: 3}
   m_InferenceDevice: 0
   m_BehaviorType: 2
   m_BehaviorName: dweller
@@ -710,10 +702,10 @@ MonoBehaviour:
   - {fileID: 2145724374}
   - {fileID: 1054675744}
   - {fileID: 356033595}
-  baseLearnRate: 0.6
+  baseLearnRate: 0.7
   baseForgetRate: 0.05
   cullRadius: 50
-  driftAmplitude: 0.1
+  driftAmplitude: 0.06
   mergeMemoryCS: {fileID: 7200000, guid: 61f2f1e25d26cd249a6324160b72d9c5, type: 3}
 --- !u!114 &470816366
 MonoBehaviour:
@@ -829,7 +821,7 @@ NavMeshAgent:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 676837033}
-  m_Enabled: 0
+  m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
   m_Speed: 0
@@ -880,10 +872,6 @@ MonoBehaviour:
   turnSpeed: 20
   actionDurationMin: 0.5
   actionDurationMax: 2
-  detectDistance: 2
-  buildingLayerMask:
-    serializedVersion: 2
-    m_Bits: 256
 --- !u!114 &676837042
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -897,7 +885,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 10
+    VectorObservationSize: 12
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 0
@@ -906,7 +894,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 10ef45a6fd97a824ba11e278a722b60b, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: 334e0b42d1f86d24f94c6c22a637f22d, type: 3}
   m_InferenceDevice: 0
   m_BehaviorType: 2
   m_BehaviorName: flaneur
@@ -1016,10 +1004,6 @@ MonoBehaviour:
   turnSpeed: 20
   actionDurationMin: 0.5
   actionDurationMax: 2
-  detectDistance: 2
-  buildingLayerMask:
-    serializedVersion: 2
-    m_Bits: 0
 --- !u!114 &701706823
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1033,7 +1017,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 10
+    VectorObservationSize: 12
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 0
@@ -1042,10 +1026,10 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: d63bbb782171e124ea3a031960d94e81, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: 334e0b42d1f86d24f94c6c22a637f22d, type: 3}
   m_InferenceDevice: 0
-  m_BehaviorType: 0
-  m_BehaviorName: flaneur2
+  m_BehaviorType: 2
+  m_BehaviorName: flaneur
   TeamId: 0
   m_UseChildSensors: 1
   m_UseChildActuators: 1
@@ -1057,7 +1041,7 @@ NavMeshAgent:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 701706816}
-  m_Enabled: 0
+  m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
   m_Speed: 0
@@ -2595,10 +2579,6 @@ MonoBehaviour:
   turnSpeed: 40
   actionDurationMin: 0.5
   actionDurationMax: 2
-  detectDistance: 2
-  buildingLayerMask:
-    serializedVersion: 2
-    m_Bits: 256
 --- !u!114 &1166053282
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2612,7 +2592,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 16
+    VectorObservationSize: 12
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 0
@@ -2621,7 +2601,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 8e973aa4a38d42f48847c73f7ee30144, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: 2cf8a8abff07c044b91919d69ceecc6c, type: 3}
   m_InferenceDevice: 0
   m_BehaviorType: 2
   m_BehaviorName: walker
@@ -2636,7 +2616,7 @@ NavMeshAgent:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1166053274}
-  m_Enabled: 0
+  m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
   m_Speed: 0
@@ -2964,10 +2944,6 @@ MonoBehaviour:
   turnSpeed: 20
   actionDurationMin: 0.5
   actionDurationMax: 2
-  obstacleDetectDistance: 1
-  buildingLayerMask:
-    serializedVersion: 2
-    m_Bits: 0
 --- !u!114 &1647481837
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2990,7 +2966,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 39d7b5d3be1d2ef428e93288bcbe54d6, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: e7f52bb4c5fe51a4e981fad4c7c19f2a, type: 3}
   m_InferenceDevice: 0
   m_BehaviorType: 2
   m_BehaviorName: dweller2

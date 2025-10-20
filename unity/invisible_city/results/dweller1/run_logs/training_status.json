@@ -1,0 +1,29 @@
+{
+    "dweller": {
+        "checkpoints": [
+            {
+                "steps": 450037,
+                "file_path": "results\\dweller1\\dweller\\dweller-450037.onnx",
+                "reward": -0.5122105198924577,
+                "creation_time": 1760903978.5735793,
+                "auxillary_file_paths": [
+                    "results\\dweller1\\dweller\\dweller-450037.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 450037,
+            "file_path": "results\\dweller1\\dweller.onnx",
+            "reward": -0.5122105198924577,
+            "creation_time": 1760903978.5735793,
+            "auxillary_file_paths": [
+                "results\\dweller1\\dweller\\dweller-450037.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.1.0",
+        "torch_version": "2.9.0.dev20250707+cu128"
+    }
+}

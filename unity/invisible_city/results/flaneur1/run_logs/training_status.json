@@ -2,22 +2,22 @@
     "flaneur": {
         "checkpoints": [
             {
-                "steps": 201315,
-                "file_path": "results\\flaneur1\\flaneur\\flaneur-201315.onnx",
-                "reward": -0.31700025824829936,
-                "creation_time": 1753763226.9647944,
+                "steps": 450011,
+                "file_path": "results\\flaneur1\\flaneur\\flaneur-450011.onnx",
+                "reward": -0.542690003514872,
+                "creation_time": 1760864423.1164076,
                 "auxillary_file_paths": [
-                    "results\\flaneur1\\flaneur\\flaneur-201315.pt"
+                    "results\\flaneur1\\flaneur\\flaneur-450011.pt"
                 ]
             }
         ],
         "final_checkpoint": {
-            "steps": 201315,
+            "steps": 450011,
             "file_path": "results\\flaneur1\\flaneur.onnx",
-            "reward": -0.31700025824829936,
-            "creation_time": 1753763226.9647944,
+            "reward": -0.542690003514872,
+            "creation_time": 1760864423.1164076,
             "auxillary_file_paths": [
-                "results\\flaneur1\\flaneur\\flaneur-201315.pt"
+                "results\\flaneur1\\flaneur\\flaneur-450011.pt"
             ]
         }
     },

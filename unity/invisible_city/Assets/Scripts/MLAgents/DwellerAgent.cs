@@ -19,9 +19,6 @@ public class DwellerAgent : Agent
     public float actionDurationMin = 0.5f;
     public float actionDurationMax = 2.0f;
 
-    [Header("Obstacle Avoidance")]
-    public float obstacleDetectDistance = 1f;
-    public LayerMask buildingLayerMask;
 
     private Animator animator;
     private float actionTimer = 0f;
@@ -76,22 +73,6 @@ public class DwellerAgent : Agent
 
     public override void OnActionReceived(ActionBuffers actions)
     {
-        // Obstacle avoidance
-        if (Physics.Raycast(transform.position + Vector3.up * 0.5f, transform.forward, out RaycastHit hit, obstacleDetectDistance, buildingLayerMask))
-        {
-            if (hit.collider.CompareTag("Building"))
-            {
-                int turnDir = Random.value > 0.5f ? 2 : 3;
-                currentAction = turnDir;
-                actionTimer = Random.Range(1.0f, 1.5f);
-                turningLastAction = true;
-
-                animator.SetInteger("ActionState", currentAction);
-                Debug.Log($"[DwellerAgent] Avoiding collision → turning {(turnDir == 2 ? "left" : "right")}");
-                PerformCurrentAction();
-                return;
-            }
-        }
 
         if (actionTimer > 0f)
         {
