@@ -7,10 +7,10 @@ public class PointCloudVisibilityManager : MonoBehaviour
 
     public ComputeShader visibilityCS;
     public BuildingPointCloudRenderer[] renderers;
-    [Range(0.5f, 1.5f)] public float baseLearnRate = 0.9f;
-    [Range(0f, 0.5f)] public float baseForgetRate = 0.15f;
+    [Range(0.5f, 1.5f)] public float baseLearnRate = 0.7f;
+    [Range(0f, 0.3f)] public float baseForgetRate = 0.05f;
     public float cullRadius = 50f;
-    public float driftAmplitude = 0.15f;
+    public float driftAmplitude = 0.06f;
 
     int kernel;
     int mergeKernel;
