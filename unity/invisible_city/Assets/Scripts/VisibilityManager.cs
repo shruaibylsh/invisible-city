@@ -14,7 +14,7 @@ public class PointCloudVisibilityManager : MonoBehaviour
 
     int kernel;
     int mergeKernel;
-    public ComputeShader mergeMemoryCS; 
+    public ComputeShader mergeMemoryCS;
     List<int> visibleAABBIndices = new List<int>();
     GraphicsBuffer visibleAABBBuffer;
 
